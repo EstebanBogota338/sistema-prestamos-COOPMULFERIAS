@@ -30,17 +30,27 @@ public final class ConexionBD {
     }
 
     public static Connection obtenerConexion(Path ruta) throws SQLException {
+        Connection cn = null;
         try {
             if (ruta.getParent() != null) {
                 Files.createDirectories(ruta.getParent());
             }
-            Connection cn = DriverManager.getConnection("jdbc:sqlite:" + ruta.toAbsolutePath());
+            cn = DriverManager.getConnection("jdbc:sqlite:" + ruta.toAbsolutePath());
             try (Statement st = cn.createStatement()) {
                 st.execute("PRAGMA foreign_keys = ON");
             }
             return cn;
         } catch (IOException e) {
             throw new SQLException("No se pudo preparar la carpeta de datos en " + ruta, e);
+        } catch (SQLException e) {
+            if (cn != null) {
+                try {
+                    cn.close();
+                } catch (SQLException errorCierre) {
+                    e.addSuppressed(errorCierre);
+                }
+            }
+            throw e;
         }
     }
 }

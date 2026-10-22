@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,13 +27,14 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 public class VentanaAsociados extends JFrame {
 
+    private static final Logger LOGGER =
+        Logger.getLogger(VentanaAsociados.class.getName());
     private static final Color FONDO = new Color(0xF5F7F6);
     private static final Color SUPERFICIE = Color.WHITE;
     private static final Color TEXTO = new Color(0x212529);
@@ -301,8 +304,10 @@ public class VentanaAsociados extends JFrame {
         try {
             List<Asociado> asociados = service.buscar(texto);
             modelo.setAsociados(asociados);
-            actualizarEstado(asociados.size(), mensaje);
+            actualizarEstado(asociados.size(), texto, mensaje);
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                "No se pudo consultar la lista de asociados.", e);
             estado.setText("No se pudo consultar la lista de asociados.");
             JOptionPane.showMessageDialog(this,
                 "No se pudo consultar la lista de asociados. Intente nuevamente.",
@@ -310,9 +315,14 @@ public class VentanaAsociados extends JFrame {
         }
     }
 
-    private void actualizarEstado(int cantidad, String mensaje) {
-        tituloTabla.setText("Asociados registrados (" + cantidad + ")");
-        String base = "Estado: " + cantidad + " registros";
+    private void actualizarEstado(int cantidad, String texto, String mensaje) {
+        boolean filtrada = texto != null && !texto.isBlank();
+        tituloTabla.setText(filtrada
+            ? "Resultados de búsqueda (" + cantidad + ")"
+            : "Asociados registrados (" + cantidad + ")");
+        String base = filtrada
+            ? "Estado: " + cantidad + " resultados"
+            : "Estado: " + cantidad + " registros";
         estado.setText(mensaje == null ? base : base + " · " + mensaje);
     }
 

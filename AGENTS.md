@@ -30,7 +30,7 @@ Las dos primeras fases están implementadas, probadas y commiteadas. **No las re
 | [InicializadorBD.java](src/main/java/com/lasferias/cooperativa/database/InicializadorBD.java) | DDL idempotente (`CREATE TABLE/INDEX IF NOT EXISTS`) |
 | [.gitignore](.gitignore) | `target/`, `.classpath`, `.project`, `.settings/`, `*.class`, `.vscode/` |
 
-### Fase 2 — módulo Asociados (commit `3e045fb`, +1.557 líneas)
+### Fase 2 — módulo Asociados (base `3e045fb` + ronda de calidad)
 
 | Archivo | Contenido |
 | --- | --- |
@@ -40,9 +40,11 @@ Las dos primeras fases están implementadas, probadas y commiteadas. **No las re
 | [ui/VentanaAsociados.java](src/main/java/com/lasferias/cooperativa/ui/VentanaAsociados.java) | Barra superior, búsqueda, `JTable` no editable, conteo y acciones |
 | [ui/FormularioAsociado.java](src/main/java/com/lasferias/cooperativa/ui/FormularioAsociado.java) | `JDialog` modal compartido para alta y edición |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa BD, aplica el look and feel del sistema y abre la ventana en el EDT; `System.exit(1)` si falla la BD |
-| Tests | `AsociadoDAOTest` (6), `AsociadoServiceTest` (7), `InicializadorBDTest` ampliado (4) → **17 pruebas** |
+| Tests | `AsociadoDAOTest` (15), `AsociadoServiceTest` (11), `InicializadorBDTest` (4), `FormularioAsociadoTest` (2), `VentanaAsociadosTest` (1) → **33 pruebas** |
 
-Verificación ejecutada y repetida: `mvn clean compile` (8 clases, release 17), `mvn test` (**17 pruebas, 0 fallos**) y `mvn exec:java` (abre "Cooperativa Las Ferias - Asociados", 1000×680, sin excepciones). El recorrido manual de clics del usuario confirmó alta, búsqueda, edición conservando ID y fecha, rechazo de duplicado y persistencia al reabrir.
+Verificación ejecutada y repetida: `mvn clean compile` (8 clases, release 17), `mvn test` (**33 pruebas, 0 fallos**) y `mvn exec:java` (abre "Cooperativa Las Ferias - Asociados", 1000×680, sin excepciones). El recorrido manual de clics del usuario confirmó alta, búsqueda, edición conservando ID y fecha, rechazo de duplicado y persistencia al reabrir.
+
+> **Ronda de calidad incluida en el commit de esta fase:** documento normalizado a mayúsculas con unicidad `NOCASE`, búsqueda insensible a acentos y comodines (filtrado en Java), orden alfabético con `Collator` es-CO, diagnóstico con `java.util.logging` y cierre de conexión si falla el `PRAGMA`. El commit histórico `3e045fb` tenía 17 pruebas; la ronda agregó 16.
 
 ### Dependencias (versiones finales, ya resueltas contra Maven Central)
 
@@ -65,7 +67,7 @@ Verificación ejecutada y repetida: `mvn clean compile` (8 clases, release 17), 
 
 ```
 mvn clean compile   → BUILD SUCCESS (8 clases)
-mvn test            → Tests run: 17, Failures: 0, Errors: 0
+mvn test            → Tests run: 33, Failures: 0, Errors: 0, Skipped: 0
 mvn exec:java       → abre la ventana de Asociados
 ```
 
@@ -231,7 +233,7 @@ com.lasferias.cooperativa
 
 ### Definición de terminado para la Fase 3
 
-- `mvn clean compile` → BUILD SUCCESS y `mvn test` → 17 pruebas previas + las nuevas, todas verdes.
+- `mvn clean compile` → BUILD SUCCESS y `mvn test` → 33 pruebas previas + las nuevas, todas verdes.
 - Con la tabla `usuario` vacía, la app pide crear el administrador y lo guarda con hash BCrypt.
 - Login con contraseña incorrecta muestra error y no abre la app.
 - Login correcto abre la ventana de Asociados existente.

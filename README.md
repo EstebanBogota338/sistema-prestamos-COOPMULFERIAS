@@ -14,7 +14,7 @@ Aplicación de escritorio **offline** (Java + Swing + SQLite) para registrar y c
 | 3 | Login y creación del administrador (BCrypt) | Pendiente |
 | 4+ | Préstamos, cuotas, pagos, historial, copia de seguridad | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite (17 pruebas automatizadas).
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite (33 pruebas automatizadas).
 
 **Aún no implementado** (no debe presentarse como operativo): inicio de sesión, pantallas de préstamos, cuotas y pagos, historial, copia de seguridad y datos de demostración.
 
@@ -28,7 +28,7 @@ Aplicación de escritorio **offline** (Java + Swing + SQLite) para registrar y c
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema y módulo de asociados, 17 en total)
+mvn test            # pruebas JUnit 5 (esquema y módulo de asociados, 33 en total)
 mvn exec:java       # inicializa la BD y ejecuta com.lasferias.cooperativa.App
 ```
 

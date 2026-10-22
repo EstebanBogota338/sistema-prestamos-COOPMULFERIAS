@@ -16,6 +16,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -31,6 +33,8 @@ import javax.swing.border.Border;
 
 public class FormularioAsociado extends JDialog {
 
+    private static final Logger LOGGER =
+        Logger.getLogger(FormularioAsociado.class.getName());
     private static final Color FONDO = new Color(0xF5F7F6);
     private static final Color SUPERFICIE = Color.WHITE;
     private static final Color TEXTO = new Color(0x212529);
@@ -162,6 +166,7 @@ public class FormularioAsociado extends JDialog {
         textoEtiqueta.setFont(fuente(Font.PLAIN, 13));
         textoEtiqueta.setForeground(TEXTO);
         textoEtiqueta.setPreferredSize(new Dimension(125, 34));
+        textoEtiqueta.setLabelFor(campo);
         panel.add(textoEtiqueta, etiquetaRestricciones);
 
         JPanel contenedor = new JPanel(new BorderLayout(0, 3));
@@ -241,6 +246,8 @@ public class FormularioAsociado extends JDialog {
         } catch (IllegalArgumentException e) {
             mostrarError(e.getMessage());
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                "No se pudo guardar el asociado.", e);
             mostrarError("No se pudo guardar el asociado. Intente nuevamente.");
         } finally {
             habilitarAcciones(true);

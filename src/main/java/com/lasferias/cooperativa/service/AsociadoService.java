@@ -40,6 +40,11 @@ public class AsociadoService {
         if (asociado.getId() <= 0) {
             throw new IllegalArgumentException("Seleccione un asociado válido para editar.");
         }
+
+        Asociado persistido = asociadoDAO.buscarPorId(asociado.getId())
+            .orElseThrow(() -> new SQLException(
+                "No se encontró el asociado que se desea actualizar."));
+        asociado.setFechaRegistro(persistido.getFechaRegistro());
         validarDocumentoDisponible(asociado.getDocumento(), asociado.getId());
 
         try {
@@ -66,7 +71,8 @@ public class AsociadoService {
         }
 
         asociado.setDocumento(normalizarObligatorio(
-            asociado.getDocumento(), "El documento es obligatorio."));
+            asociado.getDocumento(), "El documento es obligatorio.")
+            .toUpperCase(Locale.ROOT));
         asociado.setNombres(normalizarObligatorio(
             asociado.getNombres(), "Los nombres son obligatorios."));
         asociado.setApellidos(normalizarObligatorio(

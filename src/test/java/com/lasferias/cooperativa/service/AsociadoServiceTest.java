@@ -61,6 +61,20 @@ class AsociadoServiceTest {
     }
 
     @Test
+    void rechazaDocumentoDuplicadoSinDistinguirMayusculas() throws SQLException {
+        Asociado primero = service.registrar(
+            asociado("AbC123", "Ana", "Pérez", null));
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+            () -> service.registrar(asociado("abc123", "Otra", "Persona", null)));
+
+        assertEquals("ABC123",
+            dao.buscarPorId(primero.getId()).orElseThrow().getDocumento());
+        assertTrue(error.getMessage().contains("documento"));
+        assertEquals(1, dao.listar().size());
+    }
+
+    @Test
     void validaDocumentoNombresYTelefono() {
         IllegalArgumentException documento = assertThrows(IllegalArgumentException.class,
             () -> service.registrar(asociado("   ", "Ana", "Pérez", null)));
@@ -75,6 +89,27 @@ class AsociadoServiceTest {
         assertEquals("Los nombres son obligatorios.", nombres.getMessage());
         assertEquals("Los apellidos son obligatorios.", apellidos.getMessage());
         assertTrue(telefono.getMessage().contains("solo dígitos"));
+    }
+
+    @Test
+    void validaFronterasDeLongitudDelTelefono() throws SQLException {
+        assertDoesNotThrow(() -> service.registrar(
+            asociado("TEL-7", "Ana", "Siete", "1234567")));
+        assertDoesNotThrow(() -> service.registrar(
+            asociado("TEL-10", "Ana", "Diez", "1234567890")));
+
+        assertThrows(IllegalArgumentException.class, () -> service.registrar(
+            asociado("TEL-6", "Ana", "Seis", "123456")));
+        assertThrows(IllegalArgumentException.class, () -> service.registrar(
+            asociado("TEL-11", "Ana", "Once", "12345678901")));
+    }
+
+    @Test
+    void rechazaRegistroNuloConMensajeFuncional() {
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+            () -> service.registrar(null));
+
+        assertEquals("Los datos del asociado son obligatorios.", error.getMessage());
     }
 
     @Test
@@ -101,6 +136,7 @@ class AsociadoServiceTest {
 
         Asociado recuperado = dao.buscarPorDocumento("10203040").orElseThrow();
         assertEquals(id, recuperado.getId());
+        assertEquals(fechaOriginal, asociado.getFechaRegistro());
         assertEquals("Ana María", recuperado.getNombres());
         assertEquals("Pérez Díaz", recuperado.getApellidos());
         assertEquals(fechaOriginal, recuperado.getFechaRegistro());
@@ -110,15 +146,24 @@ class AsociadoServiceTest {
     void rechazaCambiarDocumentoAOtroYaRegistradoDuranteLaEdicion()
             throws SQLException {
         Asociado primero = service.registrar(
-            asociado("10203040", "Ana", "Pérez", null));
-        service.registrar(asociado("99887766", "Carlos", "Gómez", null));
+            asociado("ABC123", "Ana", "Pérez", null));
+        service.registrar(asociado("XYZ789", "Carlos", "Gómez", null));
 
-        primero.setDocumento("99887766");
+        primero.setDocumento("xyz789");
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
             () -> service.actualizar(primero));
 
         assertTrue(error.getMessage().contains("documento"));
-        assertEquals("10203040", dao.buscarPorTexto("10203040").get(0).getDocumento());
+        assertEquals("ABC123", dao.buscarPorId(primero.getId())
+            .orElseThrow().getDocumento());
+    }
+
+    @Test
+    void actualizarIdInexistenteFallaConSqlException() {
+        Asociado inexistente = new Asociado(
+            999999, "NO-EXISTE", "Sin", "Registro", null, LocalDate.now());
+
+        assertThrows(SQLException.class, () -> service.actualizar(inexistente));
     }
 
     @Test
