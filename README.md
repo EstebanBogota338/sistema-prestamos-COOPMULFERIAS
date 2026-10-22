@@ -52,6 +52,7 @@ Fechas en texto ISO (`YYYY-MM-DD`), montos en enteros.
 ```
 pom.xml
 docs/MVP-Cooperativa-Las-Ferias-v3.md
+docs/diseno/home-mockup.html
 AGENTS.md
 README.md
 src/main/java/com/lasferias/cooperativa/

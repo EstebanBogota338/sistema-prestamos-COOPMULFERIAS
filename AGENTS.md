@@ -11,6 +11,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 - **Stack:** Java (release 17), Swing, SQLite, JDBC puro, Maven.
 - **Documento de referencia (fuente de verdad funcional):** [docs/MVP-Cooperativa-Las-Ferias-v3.md](docs/MVP-Cooperativa-Las-Ferias-v3.md) — 372 líneas, léelo entero.
+- **Boceto visual del usuario:** [docs/diseno/home-mockup.html](docs/diseno/home-mockup.html) — referencia de navegación, disposición y paleta. Lee la sección 4 para saber qué sí y qué no se porta a Swing.
 - **Directorio de trabajo:** `D:\Documentos\programming\sistema-prestamos-COOPMULFERIAS`
 - **No** reemplaza Helisa. **No** hace cálculos financieros. **No** borra registros.
 
@@ -79,6 +80,10 @@ Todas las fechas son `TEXT` en ISO `YYYY-MM-DD`. Los montos son `INTEGER` (pesos
 | **Apariencia** | **Look and feel del sistema** (`UIManager.getSystemLookAndFeelClassName()`). **No** FlatLaf. Igual se respeta la paleta del documento en los componentes que se estilicen. |
 | **Git** | Repositorio git inicializado con commit inicial. Trabaja por incrementos y commitea cambios coherentes. |
 | **Plazo** | 8 jornadas completas; hay margen, pero prioriza un flujo funcional y fiable sobre detalles visuales. |
+| **fecha_registro** | Se asigna sola con `LocalDate.now()` al crear y **no es editable**; se conserva al editar. |
+| **Login (forma)** | Pedirá **solo la contraseña**; el usuario administrador es único. Fase posterior. |
+| **Teléfono** | Opcional; solo dígitos, entre 7 y 10 caracteres. |
+| **UI / boceto** | Referencia visual en [docs/diseno/home-mockup.html](docs/diseno/home-mockup.html): barra superior + paleta del documento. **La Fase 2 entrega solo Asociados**; no se implementan Home ni tarjetas de módulos inexistentes. La tarjeta «Saldo pendiente total» del boceto está **prohibida** por el documento. |
 
 ---
 
@@ -126,6 +131,10 @@ Campos: `id` (long, 0 = nuevo), `documento`, `nombres`, `apellidos`, `telefono` 
 - Mensajes de error comprensibles, en español; un dato inválido nunca debe cerrar la aplicación.
 - Nada de eliminar. Nada de animaciones. Legible a 1024×768.
 - Al arrancar: `App.main` → `InicializadorBD.inicializar()` → abrir la ventana dentro de `SwingUtilities.invokeLater(...)`. Mantén funcionando `mvn exec:java`.
+- Barra superior con el nombre **Cooperativa Las Ferias** y la pestaña activa **Asociados**, como en el boceto. **No** muestres enlaces a Home, Préstamos, Cuotas ni Pagos: todavía no existen y no deben aparecer como funcionales.
+- Aplica la paleta del documento a mano: fondo `#F5F7F6`, superficies `#FFFFFF`, texto `#212529` y `#6B7280`, bordes `#E2E5E3`, verde principal `#2F8F57`, verde oscuro `#256F45` para hover.
+- El boceto es HTML pensado para web: **no** agregues CDN, HTML ni dependencias web a la app Swing; úsalo solo como referencia de disposición y color.
+- **No** implementes la tarjeta «Saldo pendiente total» del boceto: el documento prohíbe calcular o mostrar saldos pendientes y agregaciones de importes.
 
 ### Pruebas obligatorias de la Fase 2 (JUnit 5 + `@TempDir`)
 
