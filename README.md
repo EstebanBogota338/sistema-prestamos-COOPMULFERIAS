@@ -10,10 +10,13 @@ Aplicación de escritorio **offline** (Java + Swing + SQLite) para registrar y c
 | Fase | Contenido | Estado |
 | --- | --- | --- |
 | 1 | Estructura Maven, conexión SQLite, esquema inicial y arranque verificado | Terminada |
-| 2 | Módulo Asociados (modelo, DAO, servicio, pantalla) | Pendiente |
-| 3+ | Login, préstamos, cuotas, pagos, historial, copia de seguridad | Pendiente |
+| 2 | Módulo Asociados (modelo, DAO, servicio, pantalla, pruebas) | Terminada |
+| 3 | Login y creación del administrador (BCrypt) | Pendiente |
+| 4+ | Préstamos, cuotas, pagos, historial, copia de seguridad | Pendiente |
 
-**Aún no implementado** (no debe presentarse como operativo): inicio de sesión, pantallas de préstamos, cuotas y pagos, historial y copia de seguridad desde la interfaz.
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite (17 pruebas automatizadas).
+
+**Aún no implementado** (no debe presentarse como operativo): inicio de sesión, pantallas de préstamos, cuotas y pagos, historial, copia de seguridad y datos de demostración.
 
 ## Requisitos
 
@@ -25,7 +28,7 @@ Aplicación de escritorio **offline** (Java + Swing + SQLite) para registrar y c
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema + idempotencia)
+mvn test            # pruebas JUnit 5 (esquema y módulo de asociados, 17 en total)
 mvn exec:java       # inicializa la BD y ejecuta com.lasferias.cooperativa.App
 ```
 
@@ -51,16 +54,23 @@ Fechas en texto ISO (`YYYY-MM-DD`), montos en enteros.
 
 ```
 pom.xml
-docs/MVP-Cooperativa-Las-Ferias-v3.md
-docs/diseno/home-mockup.html
 AGENTS.md
 README.md
+docs/
+├── MVP-Cooperativa-Las-Ferias-v3.md
+├── prompt-fase-2.md
+└── diseno/home-mockup.html
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
-└── database/
-    ├── ConexionBD.java
-    └── InicializadorBD.java
-src/test/java/com/lasferias/cooperativa/database/InicializadorBDTest.java
+├── database/  (ConexionBD, InicializadorBD)
+├── model/     (Asociado)
+├── dao/       (AsociadoDAO)
+├── service/   (AsociadoService)
+└── ui/        (VentanaAsociados, FormularioAsociado)
+src/test/java/com/lasferias/cooperativa/
+├── database/InicializadorBDTest.java
+├── dao/AsociadoDAOTest.java
+└── service/AsociadoServiceTest.java
 ```
 
 ## Reglas del producto (resumen)

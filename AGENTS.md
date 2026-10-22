@@ -11,24 +11,38 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 - **Stack:** Java (release 17), Swing, SQLite, JDBC puro, Maven.
 - **Documento de referencia (fuente de verdad funcional):** [docs/MVP-Cooperativa-Las-Ferias-v3.md](docs/MVP-Cooperativa-Las-Ferias-v3.md) — 372 líneas, léelo entero.
-- **Boceto visual del usuario:** [docs/diseno/home-mockup.html](docs/diseno/home-mockup.html) — referencia de navegación, disposición y paleta. Lee la sección 4 para saber qué sí y qué no se porta a Swing.
+- **Boceto visual del usuario:** [docs/diseno/home-mockup.html](docs/diseno/home-mockup.html) — referencia de navegación, disposición y paleta. La sección 4 explica qué sí y qué no se porta a Swing.
 - **Directorio de trabajo:** `D:\Documentos\programming\sistema-prestamos-COOPMULFERIAS`
 - **No** reemplaza Helisa. **No** hace cálculos financieros. **No** borra registros.
 
 ---
 
-## 2. Estado actual: Fase 1 terminada y verificada
+## 2. Estado actual: Fases 1 y 2 terminadas y verificadas
 
-La Fase 1 ya está implementada y comprobada con comandos reales. **No la rehagas.**
+Las dos primeras fases están implementadas, probadas y commiteadas. **No las rehagas.**
+
+### Fase 1 — estructura, esquema y arranque (commit `ade0cf2`)
 
 | Archivo | Contenido |
 | --- | --- |
-| [pom.xml](pom.xml) | Empaquetado `jar`, groupId `com.lasferias`, artifactId `cooperativa-las-ferias`, version `1.0-SNAPSHOT`, `maven.compiler.release=17`, UTF-8 |
-| [App.java](src/main/java/com/lasferias/cooperativa/App.java) | `main` que inicializa la BD e imprime la ruta |
+| [pom.xml](pom.xml) | Empaquetado `jar`, `com.lasferias:cooperativa-las-ferias:1.0-SNAPSHOT`, `maven.compiler.release=17`, UTF-8 |
 | [ConexionBD.java](src/main/java/com/lasferias/cooperativa/database/ConexionBD.java) | Conexiones SQLite sin conexión global; `PRAGMA foreign_keys = ON` en **cada** conexión |
 | [InicializadorBD.java](src/main/java/com/lasferias/cooperativa/database/InicializadorBD.java) | DDL idempotente (`CREATE TABLE/INDEX IF NOT EXISTS`) |
-| [InicializadorBDTest.java](src/test/java/com/lasferias/cooperativa/database/InicializadorBDTest.java) | 2 pruebas JUnit 5 con `@TempDir`: esquema e idempotencia |
 | [.gitignore](.gitignore) | `target/`, `.classpath`, `.project`, `.settings/`, `*.class`, `.vscode/` |
+
+### Fase 2 — módulo Asociados (commit `3e045fb`, +1.557 líneas)
+
+| Archivo | Contenido |
+| --- | --- |
+| [model/Asociado.java](src/main/java/com/lasferias/cooperativa/model/Asociado.java) | `id`, `documento`, `nombres`, `apellidos`, `telefono`, `fechaRegistro` (`LocalDate`) |
+| [dao/AsociadoDAO.java](src/main/java/com/lasferias/cooperativa/dao/AsociadoDAO.java) | JDBC parametrizado; constructor con `Path`; crear/actualizar/buscarPorDocumento/buscarPorTexto/listar/existeDocumento; **sin eliminar** |
+| [service/AsociadoService.java](src/main/java/com/lasferias/cooperativa/service/AsociadoService.java) | Normalización, validaciones, unicidad y fecha automática |
+| [ui/VentanaAsociados.java](src/main/java/com/lasferias/cooperativa/ui/VentanaAsociados.java) | Barra superior, búsqueda, `JTable` no editable, conteo y acciones |
+| [ui/FormularioAsociado.java](src/main/java/com/lasferias/cooperativa/ui/FormularioAsociado.java) | `JDialog` modal compartido para alta y edición |
+| [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa BD, aplica el look and feel del sistema y abre la ventana en el EDT; `System.exit(1)` si falla la BD |
+| Tests | `AsociadoDAOTest` (6), `AsociadoServiceTest` (7), `InicializadorBDTest` ampliado (4) → **17 pruebas** |
+
+Verificación ejecutada y repetida: `mvn clean compile` (8 clases, release 17), `mvn test` (**17 pruebas, 0 fallos**) y `mvn exec:java` (abre "Cooperativa Las Ferias - Asociados", 1000×680, sin excepciones). El recorrido manual de clics del usuario confirmó alta, búsqueda, edición conservando ID y fecha, rechazo de duplicado y persistencia al reabrir.
 
 ### Dependencias (versiones finales, ya resueltas contra Maven Central)
 
@@ -36,26 +50,28 @@ La Fase 1 ya está implementada y comprobada con comandos reales. **No la rehaga
 - `org.junit.jupiter:junit-jupiter:5.11.4` (scope test)
 - `maven-surefire-plugin:3.5.4`
 - `org.codehaus.mojo:exec-maven-plugin:3.1.0` con `<mainClass>com.lasferias.cooperativa.App</mainClass>`
+- **Aún no instalada** (autorizada solo para la Fase 3): `org.mindrot:jbcrypt:0.4`
 
 ### Entorno verificado
 
 - `java -version` → **openjdk 25.0.2 LTS (Temurin)**
 - `mvn -version` → **Apache Maven 3.9.16**, runtime JDK 25.0.2, plataforma UTF-8, Windows 11
 - `maven.compiler.release` = **17** (se compila con JDK 25 pero bytecode 17)
-- `JAVA_HOME` está **vacío**; Maven encuentra Java por `PATH`. No se modificó nada del sistema.
-- Hay conexión a Maven Central y caché local en `C:\Users\Casa\.m2`.
+- `JAVA_HOME` está **vacío**; Maven encuentra Java por `PATH`.
+- Caché local en `C:\Users\Casa\.m2` con todas las dependencias descargadas.
+- **El árbol pertenece a `BUILTIN\Administradores`**, así que `git` a secas falla con *dubious ownership*. Usa `git -c safe.directory="D:/Documentos/programming/sistema-prestamos-COOPMULFERIAS" …` o pide permiso para añadir la excepción a la configuración global.
 
 ### Comandos que deben seguir funcionando
 
 ```
-mvn clean compile   → BUILD SUCCESS (3 clases)
-mvn test            → Tests run: 2, Failures: 0, Errors: 0 (BUILD SUCCESS)
-mvn exec:java       → "Base de datos inicializada correctamente en: C:\Users\Casa\AppData\Roaming\CooperativaLasFerias\cooperativa.db"
+mvn clean compile   → BUILD SUCCESS (8 clases)
+mvn test            → Tests run: 17, Failures: 0, Errors: 0
+mvn exec:java       → abre la ventana de Asociados
 ```
 
-**Ruta efectiva de la BD:** `C:\Users\Casa\AppData\Roaming\CooperativaLasFerias\cooperativa.db` (se calcula como `user.home\AppData\Roaming\CooperativaLasFerias\cooperativa.db`; el archivo ya existe con las 5 tablas y los 3 índices).
+**Ruta efectiva de la BD:** `C:\Users\Casa\AppData\Roaming\CooperativaLasFerias\cooperativa.db` (`user.home\AppData\Roaming\CooperativaLasFerias\cooperativa.db`). Verificada con `PRAGMA integrity_check = ok`.
 
-### Esquema ya creado (no lo cambies sin autorización)
+### Esquema (no lo cambies sin autorización)
 
 - `usuario(id, nombre_usuario UNIQUE, contrasena_hash)`
 - `asociado(id, documento UNIQUE, nombres, apellidos, telefono, fecha_registro)`
@@ -64,7 +80,7 @@ mvn exec:java       → "Base de datos inicializada correctamente en: C:\Users\C
 - `pago(id, cuota_id FK, fecha_pago, valor>0, numero_recibo)`
 - Índices: `idx_prestamo_asociado`, `idx_cuota_prestamo`, `idx_pago_cuota`
 
-Todas las fechas son `TEXT` en ISO `YYYY-MM-DD`. Los montos son `INTEGER` (pesos, sin decimales). El DDL exacto está en `InicializadorBD`; **si necesitas un campo nuevo, pídelo antes de tocarlo**.
+Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` (pesos). La tabla `usuario` ya existe y está vacía: la Fase 3 la usa tal cual.
 
 ---
 
@@ -72,136 +88,169 @@ Todas las fechas son `TEXT` en ISO `YYYY-MM-DD`. Los montos son `INTEGER` (pesos
 
 | Tema | Decisión |
 | --- | --- |
-| **Fase 2** | **Módulo Asociados completo**: modelo, DAO, servicio con validaciones y pantalla de registro/búsqueda/edición. **El login todavía NO** (va en una fase posterior). |
-| **Administrador inicial** | Pantalla de **creación del administrador en el primer arranque** (si la tabla `usuario` está vacía). Se implementa cuando toque el login, no en Fase 2. |
-| **Hash de contraseña** | `org.mindrot:jbcrypt:0.4` (BCrypt). Obligatorio cuando se implemente el acceso. |
-| **Copia de seguridad** | Botón en la UI que copie el archivo `.db` con `JFileChooser` **+** procedimiento documentado. Fase posterior. |
-| **Datos ficticios** | Script SQL en `demo/` ejecutado manualmente; **nunca** se cargan solos al arrancar. |
-| **Apariencia** | **Look and feel del sistema** (`UIManager.getSystemLookAndFeelClassName()`). **No** FlatLaf. Igual se respeta la paleta del documento en los componentes que se estilicen. |
-| **Git** | Repositorio git inicializado con commit inicial. Trabaja por incrementos y commitea cambios coherentes. |
-| **Plazo** | 8 jornadas completas; hay margen, pero prioriza un flujo funcional y fiable sobre detalles visuales. |
-| **fecha_registro** | Se asigna sola con `LocalDate.now()` al crear y **no es editable**; se conserva al editar. |
-| **Login (forma)** | Pedirá **solo la contraseña**; el usuario administrador es único. Fase posterior. |
+| **Fase 2** | Módulo Asociados completo — **terminada**. |
+| **Fase 3 (ahora)** | **Login + pantalla de creación del administrador en el primer arranque.** No se tocan préstamos, cuotas, pagos ni dashboard. |
+| **Administrador inicial** | Si la tabla `usuario` está vacía, la app pide crear el administrador antes de dejar entrar. |
+| **Formulario de acceso** | Pide **solo la contraseña**; el usuario administrador es único. |
+| **Hash de contraseña** | `org.mindrot:jbcrypt:0.4` (BCrypt). Obligatorio; nunca texto plano. |
+| **Política de contraseña** | *Supuesto mínimo:* obligatoria y de 6 caracteres o más, con confirmación en la creación. Si el usuario define otra regla, prevalece la suya. |
+| **Sesión** | Sin "cerrar sesión", sin multiusuario ni permisos. |
+| **Copia de seguridad** | Botón con `JFileChooser` + procedimiento documentado. Fase posterior. |
+| **Datos ficticios** | Script SQL en `demo/` ejecutado manualmente; **nunca** al arrancar. |
+| **Apariencia** | Look and feel del sistema. **No** FlatLaf. Paleta del documento aplicada a mano. |
+| **Git** | Commits pequeños en español. No commitear sin pedirlo. |
+| **Plazo** | 8 jornadas completas; prioriza flujo funcional sobre detalles visuales. |
+| **fecha_registro** | Automática al crear y **no editable**; se conserva al editar. |
 | **Teléfono** | Opcional; solo dígitos, entre 7 y 10 caracteres. |
-| **UI / boceto** | Referencia visual en [docs/diseno/home-mockup.html](docs/diseno/home-mockup.html): barra superior + paleta del documento. **La Fase 2 entrega solo Asociados**; no se implementan Home ni tarjetas de módulos inexistentes. La tarjeta «Saldo pendiente total» del boceto está **prohibida** por el documento. |
+| **UI / boceto** | Barra superior + paleta del mockup. **No** se muestran módulos inexistentes, saldos ni estados no documentados. |
 
 ---
 
-## 4. Alcance concreto de la Fase 2 — Asociados
+## 4. Patrón establecido en la Fase 2 (reutilízalo)
 
-**Objetivo:** un usuario puede registrar, buscar, consultar y editar asociados desde Swing, con validaciones y persistencia real en SQLite.
+Cada módulo nuevo sigue esta estructura: `model` (datos), `dao` (JDBC parametrizado con `Path` inyectable), `service` (validación + mensajes en español + traducción de `UNIQUE`), `ui` (pantalla + diálogo compartido).
 
-### Paquetes y clases (nombres obligatorios)
+- **DAO:** `try-with-resources`, `PreparedStatement` siempre, sin SQL concatenado con datos del usuario, sin métodos de borrado, cada operación abre y cierra su conexión.
+- **Service:** normaliza (`trim`, teléfono vacío → `null`), lanza `IllegalArgumentException` con texto legible y asigna las reglas del sistema (fecha). Las excepciones de BD se traducen o se propagan como `SQLException`, nunca se muestran como éxito.
+- **UI:** constantes de color, barra superior del mockup, tarjetas blancas con borde `#E2E5E3`, tabla no editable, formulario modal para alta y edición, mensajes de error junto a los botones, estado en la barra inferior.
+- **Tests:** JUnit 5 con `@TempDir`, BD sembrada con `InicializadorBD.inicializar(ruta)`, DAO/service construidos con esa ruta. **Nunca** se usa la BD real.
+
+### Paleta y medidas del boceto (aplicables a cualquier pantalla)
+
+| Elemento | Valor |
+| --- | --- |
+| Fondo / superficie | `#F5F7F6` / `#FFFFFF` |
+| Texto principal / secundario | `#212529` / `#6B7280` |
+| Bordes | `#E2E5E3` (0.5–1 px) |
+| Verde principal / hover | `#2F8F57` / `#256F45` |
+| Radio | `8px` tarjetas |
+| Barra superior | 52 px, blanca, borde inferior, título 15 px 500 |
+| Títulos de tarjeta / etiquetas | 14 px 500 / 13 px 500 `#6B7280` |
+| Botón primario | fondo `#2F8F57`, texto blanco |
+
+No portar HTML, CSS, CDN ni iconos: la UI es Swing.
+
+---
+
+## 5. Alcance de la Fase 3 — Login y administrador inicial
+
+**Objetivo:** al arrancar, la app exige credenciales. La primera vez guía la creación del administrador; después pide la contraseña. Con la contraseña correcta abre la ventana de Asociados ya existente.
+
+### Flujo
+
+1. `App.main` inicializa la BD (igual que ahora) y aplica el look and feel del sistema.
+2. Si `usuario` está vacía → **VentanaCreacionAdministrador** (usuario sugerido `admin`, contraseña y confirmación).
+3. Al crear → se guarda el hash y se continúa al login (o se entra directo; documenta lo que elijas).
+4. Si ya hay administrador → **VentanaLogin** (solo contraseña).
+5. Contraseña correcta → `new VentanaAsociados(new AsociadoService()).setVisible(true)`.
+6. Contraseña incorrecta → mensaje claro, sin cerrar la app y sin revelar detalles internos.
+7. Falla la BD → mensaje y `System.exit(1)` (comportamiento actual, no lo rompas).
+
+### Clases (nombres obligatorios)
 
 ```
 com.lasferias.cooperativa
-├── App.java                     (modificar: inicializar BD y abrir la ventana de Asociados)
-├── model/Asociado.java
-├── dao/AsociadoDAO.java
-├── service/AsociadoService.java
-├── ui/VentanaAsociados.java     (JFrame con búsqueda + JTable)
-├── ui/FormularioAsociado.java   (JDialog de alta/edición)
-└── database/ (sin cambios)
+├── App.java                      (modificar el flujo de arranque)
+├── model/Usuario.java
+├── dao/UsuarioDAO.java
+├── service/AutenticacionService.java
+├── ui/VentanaLogin.java
+└── ui/VentanaCreacionAdministrador.java
 ```
 
-### Modelo `Asociado`
+### Modelo `Usuario`
 
-Campos: `id` (long, 0 = nuevo), `documento`, `nombres`, `apellidos`, `telefono` (puede ser nulo o vacío), `fechaRegistro` (`LocalDate`). Constructores y getters/setters. Sin lógica de negocio en el modelo.
+`id` (long), `nombreUsuario`, `contrasenaHash`. **Nunca** guardes ni transportes la contraseña en claro en el modelo.
 
-### `AsociadoDAO` (JDBC puro, sin ORM)
+### `UsuarioDAO`
 
-- `crear(Asociado)`, `actualizar(Asociado)`, `buscarPorDocumento(String)`, `buscarPorTexto(String)` (busca en documento, nombres o apellidos con `LIKE`), `listar()`, `existeDocumento(String, long idExcluir)`.
-- **Todas** las consultas con `PreparedStatement` paramétrizado, `try-with-resources`, sin SQL concatenado.
-- El DAO debe poder apuntar a **una ruta de BD arbitraria** (por ejemplo, constructor con `Path` que use `ConexionBD.obtenerConexion(ruta)`; por defecto `ConexionBD.rutaBaseDatos()`). Las pruebas lo necesitan para usar `@TempDir`.
-- **No** implementes `eliminar(...)`: está prohibido por el documento.
+- `crear(Usuario)`, `obtenerAdministrador()` → `Optional<Usuario>`, `existeAlgunUsuario()`.
+- Columnas exactas: `id, nombre_usuario, contrasena_hash`. Conexión con `ConexionBD.obtenerConexion(Path)` y constructor con ruta para los tests.
+- Sin actualizar ni eliminar en esta fase (el cambio de contraseña está fuera de alcance).
 
-### `AsociadoService` (validaciones con mensajes en español)
+### `AutenticacionService`
 
-- Documento: obligatorio, sin espacios sobrantes y **único** (consulta al DAO antes de insertar o actualizar).
-- Nombres y apellidos: obligatorios.
-- Teléfono: opcional; si viene, sin letras.
-- `fechaRegistro`: **se asigna automáticamente** con la fecha del alta (`LocalDate.now()`) y se conserva al editar. *Supuesto documentado: no se edita a mano en la Fase 2; si el usuario pide lo contrario, se ajusta.*
-- Los errores se comunican con `IllegalArgumentException` (o una excepción de validación propia) con mensaje claro para mostrar en un `JOptionPane`.
-- La unicidad también está respaldada por el `UNIQUE` de la BD.
+- `debeCrearAdministrador()` → tabla vacía.
+- `crearAdministrador(nombreUsuario, contrasena, confirmacion)`: nombre obligatorio y único, contraseña de 6+ caracteres, confirmación idéntica; genera hash con `BCrypt.hashpw(contrasena, BCrypt.gensalt())`.
+- `autenticar(contrasena)` → `boolean` comparando con `BCrypt.checkpw` contra el hash almacenado.
+- Errores con `IllegalArgumentException` y mensajes en español. **Nunca** loguees contraseñas ni hashes.
 
-### UI (Swing, sin FlatLaf)
+### UI
 
-- Ventana principal: campo de búsqueda por documento o texto, `JTable` no editable con Documento, Nombres, Apellidos, Teléfono y Fecha de registro; botones **Nuevo**, **Editar** y **Actualizar lista**.
-- Formulario en `JDialog` modal con etiquetas claras; alta y edición comparten el formulario.
-- Mensajes de error comprensibles, en español; un dato inválido nunca debe cerrar la aplicación.
-- Nada de eliminar. Nada de animaciones. Legible a 1024×768.
-- Al arrancar: `App.main` → `InicializadorBD.inicializar()` → abrir la ventana dentro de `SwingUtilities.invokeLater(...)`. Mantén funcionando `mvn exec:java`.
-- Barra superior con el nombre **Cooperativa Las Ferias** y la pestaña activa **Asociados**, como en el boceto. **No** muestres enlaces a Home, Préstamos, Cuotas ni Pagos: todavía no existen y no deben aparecer como funcionales.
-- Aplica la paleta del documento a mano: fondo `#F5F7F6`, superficies `#FFFFFF`, texto `#212529` y `#6B7280`, bordes `#E2E5E3`, verde principal `#2F8F57`, verde oscuro `#256F45` para hover.
-- El boceto es HTML pensado para web: **no** agregues CDN, HTML ni dependencias web a la app Swing; úsalo solo como referencia de disposición y color.
-- **No** implementes la tarjeta «Saldo pendiente total» del boceto: el documento prohíbe calcular o mostrar saldos pendientes y agregaciones de importes.
+- Mantén la barra superior y la paleta de la sección 4.
+- Login: `JPasswordField`, botón **Ingresar** como botón por defecto, mensaje de error visible; cerrar la ventana cierra la app (no hay sesión que cerrar).
+- Creación: usuario (por defecto `admin`), contraseña y repetir, mensajes de validación, botón **Crear administrador**.
 
-### Pruebas obligatorias de la Fase 2 (JUnit 5 + `@TempDir`)
+### Dependencia autorizada
 
-1. Registrar un asociado válido y recuperarlo por documento.
-2. Intentar registrar un **documento duplicado** → debe fallar con mensaje claro.
-3. Buscar por documento existente y por documento inexistente (sin excepción).
-4. Editar un asociado y comprobar que el cambio persiste y el `id` no cambia.
-5. Validaciones: documento vacío, nombres vacíos, teléfono con letras.
-6. Persistencia: cerrar y reabrir la conexión y verificar que el registro sigue ahí.
+`org.mindrot:jbcrypt:0.4` (scope default). Es la **única** dependencia nueva permitida en esta fase; no toques las demás.
 
-Nunca escribas en `%APPDATA%` desde las pruebas.
+### Pruebas obligatorias (JUnit 5 + `@TempDir`)
+
+1. Crear administrador → una fila en `usuario` y hash distinto de la contraseña (empieza por `$2a$`).
+2. `autenticar` devuelve `true` con la contraseña correcta y `false` con otra.
+3. Creación rechaza contraseña vacía, menor de 6, confirmación distinta y nombre vacío.
+4. `debeCrearAdministrador` verdadero con BD vacía y falso tras crearlo.
+5. Persistencia: otra instancia del DAO (nuevas conexiones) encuentra el administrador.
+6. Login incorrecto no autentica y no rompe la BD.
+7. Ninguna prueba escribe en `%APPDATA%`.
 
 ---
 
-## 5. Reglas de negocio que NO se pueden romper (todo el MVP)
+## 6. Reglas de negocio que NO se pueden romper (todo el MVP)
 
 - **Nada de cálculos financieros:** sin intereses, amortización, saldo pendiente, valor de cuota calculado ni agregaciones de montos.
-- **Nada de borrar registros:** ni asociados, ni préstamos, ni cuotas, ni pagos. Solo editar.
-- **Cuotas con pagos asociados:** no se puede editar número, valor ni fecha de vencimiento (se implementa en su fase).
+- **Nada de borrar registros:** ni usuarios, ni asociados, ni préstamos, ni cuotas, ni pagos. Solo editar.
+- **Cuotas con pagos asociados:** no se puede editar número, valor ni fecha de vencimiento.
 - **Pagos:** se editan directamente sobre el registro; **sin historial de versiones ni auditoría**.
 - **Abonos parciales permitidos**; valores nulos, cero o negativos rechazados.
-- **Contraseña siempre con hash** (nunca en texto plano) cuando se implemente el login.
+- **Contraseña siempre con BCrypt** (nunca texto plano, nunca en logs).
 - **FK activas** en cada conexión, consultas parametrizadas y transacciones cuando haya varias escrituras relacionadas.
 - **No inventar** campos, tablas, estados ni validaciones fuera del documento.
-- La BD vive en `%APPDATA%\CooperativaLasFerias`, nunca en `target/` ni en carpetas temporales. No la subas al repositorio.
+- La BD vive en `%APPDATA%\CooperativaLasFerias`, nunca en `target/` ni en temporales. No la subas al repositorio.
 
 ---
 
-## 6. Convenciones del proyecto
+## 7. Convenciones del proyecto
 
-- Paquete base `com.lasferias.cooperativa`; **identificadores, comentarios y mensajes de UI en español** (así está la Fase 1: `ConexionBD`, `rutaBaseDatos`).
+- Paquete base `com.lasferias.cooperativa`; identificadores, comentarios y mensajes en español.
 - JDBC directo con `try-with-resources`; nada de frameworks ni ORM.
-- Dependencias nuevas: solo con justificación y autorización del usuario. (Prevista más adelante: `org.mindrot:jbcrypt:0.4`.)
-- No cambies el DDL existente ni los nombres de columnas; el mapeo a Java es `snake_case` → `camelCase`.
-- Commits en español, pequeños y con mensaje claro (`Fase 2: ...`).
+- Dependencias nuevas: solo con justificación y autorización. En la Fase 3 la única es `jbcrypt`.
+- No cambies el DDL existente ni los nombres de columnas; mapeo `snake_case` → `camelCase`.
+- Commits en español, pequeños y claros (`Fase 3: ...`); no commitear sin pedido explícito.
 
 ---
 
-## 7. Cómo trabajar (obligatorio)
+## 8. Cómo trabajar (obligatorio)
 
-1. `git status` y revisa el árbol antes de editar.
-2. Implementa en incrementos: modelo → DAO → pruebas DAO → servicio → pruebas servicio → UI.
-3. Ejecuta `mvn clean compile` y `mvn test` tras cada incremento relevante; no afirmes que algo funciona sin verlo.
-4. Al terminar, ejecuta también `mvn exec:java` y comprueba que la ventana abre y que la BD real no se corrompe.
-5. Reporta: archivos creados o modificados, comandos ejecutados con su salida real, cuántas pruebas pasan, decisiones tomadas y pendientes o limitaciones. Si algo no se implementó, dilo explícitamente (el documento lo exige).
+1. `git -c safe.directory=… status` y revisa el árbol antes de editar.
+2. Incrementos: modelo → DAO → pruebas DAO → servicio → pruebas servicio → UI → integración con `App`.
+3. Ejecuta `mvn clean compile` y `mvn test` tras cada incremento; no afirmes que algo funciona sin verlo.
+4. Al terminar, `mvn exec:java` y comprueba el flujo real: primer arranque pide crear administrador, login incorrecto falla, login correcto abre Asociados.
+5. Reporta archivos, comandos con su salida real, pruebas (cuántas pasan), decisiones y limitaciones. Si no pudiste ver la UI, dilo.
 
-### Definición de terminado para la Fase 2
+### Definición de terminado para la Fase 3
 
-- `mvn clean compile` → BUILD SUCCESS.
-- `mvn test` → todas las pruebas verdes (las 2 de Fase 1 + las nuevas de Asociados).
-- `mvn exec:java` → abre la ventana de Asociados sin excepciones en consola.
-- Flujo manual probado: crear asociado → aparece en la tabla → buscarlo por documento → editarlo → reabrir la app y verlo igual.
-- Un documento duplicado se rechaza con mensaje visible.
-- Nada de botones ni menús de eliminación.
+- `mvn clean compile` → BUILD SUCCESS y `mvn test` → 17 pruebas previas + las nuevas, todas verdes.
+- Con la tabla `usuario` vacía, la app pide crear el administrador y lo guarda con hash BCrypt.
+- Login con contraseña incorrecta muestra error y no abre la app.
+- Login correcto abre la ventana de Asociados existente.
+- Al cerrar y reabrir, el administrador sigue existiendo y el login funciona.
+- `System.exit(1)` ante fallo de BD intacto; sin datos ficticios; sin módulos nuevos a la vista.
 
 ---
 
-## 8. Trampas conocidas del entorno
+## 9. Trampas conocidas del entorno
 
-- **JDK 25:** al cargar la DLL de SQLite aparece `WARNING: A restricted method in java.lang.System has been called`. Es inocuo (las pruebas pasan). No lo silencies cambiando el pom sin consultar.
-- **PowerShell envuelve stderr** de `java` o `mvn` como `NativeCommandError`; es cosmético. Verifica el código real con `$LASTEXITCODE`.
-- **`JAVA_HOME` vacío**: Maven usa el Java del `PATH`. No configures variables de sistema.
-- `.github/modernize/` es basura de una extensión de VS Code, **no es parte del MVP**; está excluida vía `.git/info/exclude`. No la borres ni la toques.
+- **Propiedad del repo:** todo el árbol es de `BUILTIN\Administradores`; `git` sin `-c safe.directory=…` falla con *dubious ownership*. No cambies la configuración global sin permiso del usuario.
+- **JDK 25:** al cargar la DLL de SQLite aparece `WARNING: A restricted method in java.lang.System has been called`. Es inocuo.
+- **PowerShell envuelve stderr** de `java`/`mvn` como `NativeCommandError`; verifica con `$LASTEXITCODE`.
+- **`JAVA_HOME` vacío:** Maven usa el Java del `PATH`. No configures variables de sistema.
+- `.github/modernize/` es basura de una extensión de VS Code, excluida vía `.git/info/exclude`. No la toques.
 - No instales herramientas globales ni ejecutes comandos destructivos.
 
 ---
 
-## 9. Qué sigue después de la Fase 2 (contexto, no lo implementes todavía)
+## 10. Roadmap
 
-Login con pantalla de creación del administrador y jBCrypt → Préstamos → Cuotas → Pagos con abonos parciales y edición directa → Historial por asociado → Copia de seguridad desde la UI → Documentación (README, procedimiento de respaldo, limitaciones conocidas).
+Fase 3 (login + administrador) → Préstamos → Cuotas → Pagos con abonos parciales y edición directa → Historial por asociado → Copia de seguridad desde la UI → Documentación final (README, procedimiento de respaldo, limitaciones conocidas).
