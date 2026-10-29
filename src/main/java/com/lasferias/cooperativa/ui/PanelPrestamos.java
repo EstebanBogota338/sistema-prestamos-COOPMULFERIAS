@@ -68,7 +68,8 @@ public class PanelPrestamos extends JPanel {
             List<Prestamo> prestamos = prestamoService.listar();
             modelo.setDatos(prestamos, asociados);
             tituloTabla.setText("Préstamos registrados (" + prestamos.size() + ")");
-            estado.setText("Estado: " + prestamos.size() + " registros");
+            estado.setText("Estado: " + prestamos.size()
+                + (prestamos.size() == 1 ? " registro" : " registros"));
             editar.setEnabled(false);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE,

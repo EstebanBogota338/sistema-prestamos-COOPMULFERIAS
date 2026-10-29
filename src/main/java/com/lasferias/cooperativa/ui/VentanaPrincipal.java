@@ -89,7 +89,7 @@ public class VentanaPrincipal extends JFrame {
         avatar.setOpaque(true);
         avatar.setBackground(Estilo.VERDE_SUAVE);
         avatar.setPreferredSize(new Dimension(30, 30));
-        avatar.setBorder(BorderFactory.createLineBorder(Estilo.VERDE_SUAVE, 8));
+        avatar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         JPanel usuario = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         usuario.setOpaque(false);
         usuario.add(avatar);

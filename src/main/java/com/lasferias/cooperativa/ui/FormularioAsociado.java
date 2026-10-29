@@ -52,6 +52,7 @@ public class FormularioAsociado extends JDialog {
         configurarVentana();
         construirInterfaz();
         cargarDatos();
+        pack();
     }
 
     public static Asociado mostrar(JFrame propietario, AsociadoService service,
@@ -66,8 +67,6 @@ public class FormularioAsociado extends JDialog {
     private void configurarVentana() {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
-        setSize(540, 480);
-        setMinimumSize(new Dimension(540, 480));
     }
 
     private void construirInterfaz() {

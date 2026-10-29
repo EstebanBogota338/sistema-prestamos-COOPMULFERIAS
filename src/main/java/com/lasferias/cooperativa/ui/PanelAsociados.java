@@ -260,8 +260,10 @@ public class PanelAsociados extends JPanel {
             ? "Resultados de búsqueda (" + cantidad + ")"
             : "Asociados registrados (" + cantidad + ")");
         String base = filtrada
-            ? "Estado: " + cantidad + " resultados"
-            : "Estado: " + cantidad + " registros";
+            ? "Estado: " + cantidad
+                + (cantidad == 1 ? " resultado" : " resultados")
+            : "Estado: " + cantidad
+                + (cantidad == 1 ? " registro" : " registros");
         estado.setText(mensaje == null ? base : base + " · " + mensaje);
     }
 

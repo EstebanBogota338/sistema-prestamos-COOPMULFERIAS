@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicButtonUI;
 
 /**
  * Estilos compartidos de la interfaz.
@@ -39,6 +40,7 @@ public final class Estilo {
     }
 
     public static void botonPrimario(JButton boton) {
+        boton.setUI(new BasicButtonUI());
         boton.setFont(fuente(Font.BOLD, 13));
         boton.setForeground(Color.WHITE);
         boton.setBackground(VERDE);
