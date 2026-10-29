@@ -2,11 +2,13 @@ package com.lasferias.cooperativa.ui;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JPasswordField;
 import javax.swing.border.Border;
 
 /**
@@ -77,6 +79,15 @@ public final class Estilo {
         return BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(BORDE),
             BorderFactory.createEmptyBorder(7, 9, 7, 9));
+    }
+
+    public static void campoPassword(JPasswordField campo) {
+        campo.setFont(fuente(Font.PLAIN, 13));
+        campo.setForeground(TEXTO);
+        campo.setBackground(SUPERFICIE);
+        campo.setCaretColor(TEXTO);
+        campo.setBorder(bordeCampo());
+        campo.setPreferredSize(new Dimension(300, 34));
     }
 
     private static Border margenBoton() {
