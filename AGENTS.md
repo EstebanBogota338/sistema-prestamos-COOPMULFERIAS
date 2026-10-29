@@ -17,7 +17,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2 y 2.5 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5 y 3 terminadas
 
 **No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`.
 
@@ -41,9 +41,20 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel del sistema y abre la ventana en el EDT; `System.exit(1)` si falla la BD |
 
-**Pruebas: 33** (JUnit 5 + `@TempDir`) — `AsociadoDAOTest` 15, `AsociadoServiceTest` 11, `InicializadorBDTest` 4, `FormularioAsociadoTest` 2, `VentanaAsociadosTest` 1. Los reportes de surefire de la última ejecución muestran 0 fallos.
+**Pruebas: 49** (JUnit 5 + `@TempDir`) — 33 de las fases 1–2.5 (`AsociadoDAOTest` 15, `AsociadoServiceTest` 11, `InicializadorBDTest` 4, `FormularioAsociadoTest` 2, `VentanaAsociadosTest` 1) y 16 de la Fase 3 (`AutenticacionServiceTest` 12, `UsuarioDAOTest` 4). Los reportes de surefire de la última ejecución muestran 0 fallos.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
+
+### Fase 3 — login y administrador inicial
+
+| Archivo | Contenido |
+| --- | --- |
+| [model/Usuario.java](src/main/java/com/lasferias/cooperativa/model/Usuario.java) | `id` (long), `nombreUsuario`, `contrasenaHash`; nunca transporta la contraseña en claro |
+| [dao/UsuarioDAO.java](src/main/java/com/lasferias/cooperativa/dao/UsuarioDAO.java) | JDBC con `Path`; `crear`, `obtenerAdministrador` → `Optional<Usuario>`, `existeAlgunUsuario`. Sin actualizar ni eliminar |
+| [service/AutenticacionService.java](src/main/java/com/lasferias/cooperativa/service/AutenticacionService.java) | `NOMBRE_ADMINISTRADOR = "admin"`; `debeCrearAdministrador`, `crearAdministrador(contrasena, confirmacion)` con BCrypt y `autenticar(contrasena)` |
+| [ui/VentanaLogin.java](src/main/java/com/lasferias/cooperativa/ui/VentanaLogin.java) | Login con `JPasswordField`, botón **Ingresar** por defecto; cerrar la ventana cierra la app |
+| [ui/VentanaCreacionAdministrador.java](src/main/java/com/lasferias/cooperativa/ui/VentanaCreacionAdministrador.java) | Contraseña y confirmación; al crear el administrador abre el login |
+| [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | `Estilo.campoPassword(JPasswordField)` (solo acepta `JPasswordField`) |
 
 ### Dependencias (versiones finales)
 
@@ -51,7 +62,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 - `org.junit.jupiter:junit-jupiter:5.11.4` (test)
 - `maven-surefire-plugin:3.5.4`
 - `org.codehaus.mojo:exec-maven-plugin:3.1.0` (`mainClass` = `com.lasferias.cooperativa.App`)
-- **Aún no instalada** (autorizada solo para la Fase 3): `org.mindrot:jbcrypt:0.4`
+- `org.mindrot:jbcrypt:0.4` (instalada en la Fase 3; hash de contraseñas con BCrypt)
 
 ### Entorno verificado
 
@@ -148,64 +159,13 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 
 ---
 
-## 7. Fase 3 — Login y administrador inicial
+## 7. Fase 3 — Login y administrador inicial (terminada)
 
-**Objetivo:** al arrancar, la app exige la contraseña. La primera vez guía la creación del administrador; después pide la contraseña. Con la contraseña correcta abre la ventana de Asociados existente. **Es la tarea inmediata.**
+- Login: pide solo la contraseña.
+- Usuario: siempre `admin` (constante del servicio).
+- Al crear el administrador se abre el login.
 
-### Flujo
-
-1. `App.main` inicializa la BD (como ahora) y aplica el look and feel del sistema.
-2. Si `usuario` está vacía → **VentanaCreacionAdministrador**: contraseña y confirmación (sin campo de usuario).
-3. Al crear → se guarda el hash y se continúa al login (o se entra directo; documenta lo que elijas).
-4. Si ya hay administrador → **VentanaLogin** (solo contraseña).
-5. Contraseña correcta → `new VentanaAsociados(new AsociadoService()).setVisible(true)`.
-6. Contraseña incorrecta → mensaje claro, sin cerrar la app y sin revelar detalles internos.
-7. Falla la BD → mensaje y `System.exit(1)` (comportamiento actual; no lo rompas).
-
-### Clases (nombres obligatorios)
-
-```
-com.lasferias.cooperativa
-├── App.java                       (modificar el flujo de arranque)
-├── model/Usuario.java
-├── dao/UsuarioDAO.java
-├── service/AutenticacionService.java
-├── ui/VentanaLogin.java
-└── ui/VentanaCreacionAdministrador.java
-```
-
-- **`Usuario`:** `id` (long), `nombreUsuario`, `contrasenaHash`. Nunca guardes ni transportes la contraseña en claro en el modelo.
-- **`UsuarioDAO`:** `crear(Usuario)`, `obtenerAdministrador()` → `Optional<Usuario>`, `existeAlgunUsuario()`. Columnas exactas `id, nombre_usuario, contrasena_hash`. Constructor con `Path` para las pruebas. Sin actualizar ni eliminar.
-- **`AutenticacionService`:**
-  - Constante `NOMBRE_ADMINISTRADOR = "admin"`.
-  - `debeCrearAdministrador()` → tabla vacía.
-  - `crearAdministrador(contrasena, confirmacion)`: si ya existe algún usuario, `IllegalArgumentException("Ya existe un administrador registrado.")`; contraseña de 6+ caracteres; confirmación idéntica; hash con `BCrypt.hashpw(contrasena, BCrypt.gensalt())`; guarda con `NOMBRE_ADMINISTRADOR`.
-  - `autenticar(contrasena)` → `boolean` con `BCrypt.checkpw` contra el hash almacenado; sin administrador devuelve `false`, no lanza.
-  - Errores con `IllegalArgumentException` y mensajes en español. **Nunca** loguees contraseñas ni hashes.
-- **UI:** usa `Estilo`. Login con `JPasswordField`, botón **Ingresar** por defecto, mensaje de error visible; cerrar la ventana cierra la app. Creación con dos `JPasswordField` y botón **Crear administrador**.
-
-### Dependencia autorizada
-
-`org.mindrot:jbcrypt:0.4` (scope default). Es la **única** dependencia nueva permitida; no toques las demás.
-
-### Pruebas obligatorias (JUnit 5 + `@TempDir`)
-
-1. Crear administrador → una fila en `usuario`, `nombre_usuario = "admin"`, hash distinto de la contraseña y que empieza por `$2a$`.
-2. `autenticar` devuelve `true` con la contraseña correcta y `false` con otra.
-3. La creación rechaza contraseña vacía, menor de 6 caracteres y confirmación distinta.
-4. `debeCrearAdministrador` es verdadero con BD vacía y falso tras crearlo.
-5. Una segunda llamada a `crearAdministrador` falla y sigue habiendo una sola fila.
-6. Persistencia: otra instancia del DAO (nuevas conexiones) encuentra el administrador.
-7. Login incorrecto no autentica y no rompe la BD; `autenticar` con tabla vacía devuelve `false`.
-8. Ninguna prueba escribe en `%APPDATA%`.
-
-### Definición de terminado
-
-- `mvn clean compile` → BUILD SUCCESS y `mvn test` → 33 pruebas previas + las nuevas, todas verdes.
-- Con `usuario` vacía, la app pide crear el administrador y lo guarda con hash BCrypt.
-- Contraseña incorrecta: error y no abre la app. Contraseña correcta: abre Asociados.
-- Al cerrar y reabrir, el administrador sigue existiendo y el login funciona.
-- `System.exit(1)` ante fallo de BD intacto; sin datos ficticios; sin módulos nuevos a la vista; sin cambios de esquema.
+Siguiente tarea: Préstamos (ver sección 12).
 
 ---
 
@@ -261,7 +221,7 @@ com.lasferias.cooperativa
 ### Roadmap (orden)
 
 1. **Fase 2.5:** extraer `ui/Estilo` — terminada.
-2. **Fase 3:** login y administrador inicial (sección 7).
+2. **Fase 3:** login y administrador inicial — terminada.
 3. **Triggers de SQLite** — solo si el usuario autoriza P1.
 4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual.
 5. **Cuotas:** antes de empezar, crear un helper `database/ErroresBD` (p. ej. `esViolacionUnica(SQLException)`) con su prueba y usarlo también en `AsociadoService`, en vez de copiar la comparación por texto del mensaje de error. Bloqueo de edición con pagos en el servicio.
@@ -281,3 +241,5 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - Si se adopta P2 como se recomienda, un registro creado bajo un padre equivocado no puede moverse ni eliminarse.
 - La unicidad del documento en SQLite distingue mayúsculas; el servicio normaliza a mayúsculas antes de guardar.
 - La ruta de la BD se arma con `user.home\AppData\Roaming`, no con la variable `%APPDATA%`; pueden diferir si el perfil está redirigido.
+- No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
+- `Estilo.campoPassword` solo acepta `JPasswordField`: al llegar Préstamos, generalizar a `Estilo.campo(JTextField)`.

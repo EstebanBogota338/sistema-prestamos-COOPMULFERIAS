@@ -14,12 +14,12 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 1 | Estructura Maven, conexión SQLite, esquema inicial y arranque verificado | Terminada |
 | 2 | Módulo Asociados (modelo, DAO, servicio, pantalla, pruebas) | Terminada |
 | 2.5 | Extracción de estilos compartidos de la interfaz (`ui/Estilo`) | Terminada |
-| 3 | Inicio de sesión y creación del administrador (BCrypt) | Pendiente |
+| 3 | Inicio de sesión y creación del administrador (BCrypt) | Terminada |
 | 4+ | Préstamos, cuotas, pagos, historial, copia de seguridad, datos de demostración | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite. **33 pruebas automatizadas.**
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite; además, inicio de sesión y creación del administrador inicial con la contraseña almacenada como hash BCrypt. **49 pruebas automatizadas.**
 
-**Aún no implementado** (no debe presentarse como operativo): inicio de sesión, pantallas de préstamos, cuotas y pagos, historial, copia de seguridad y datos de demostración.
+**Aún no implementado** (no debe presentarse como operativo): pantallas de préstamos, cuotas y pagos, historial, copia de seguridad y datos de demostración.
 
 ## Requisitos
 
@@ -76,10 +76,11 @@ docs/
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
-├── model/     (Asociado)
-├── dao/       (AsociadoDAO)
-├── service/   (AsociadoService)
-└── ui/        (Estilo, VentanaAsociados, FormularioAsociado)
+├── model/     (Asociado, Usuario)
+├── dao/       (AsociadoDAO, UsuarioDAO)
+├── service/   (AsociadoService, AutenticacionService)
+└── ui/        (Estilo, VentanaAsociados, FormularioAsociado, VentanaLogin,
+                VentanaCreacionAdministrador)
 src/test/java/com/lasferias/cooperativa/
 ├── database/InicializadorBDTest.java
 ├── dao/AsociadoDAOTest.java
@@ -108,3 +109,4 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - La edición de pagos **no conserva versiones anteriores** ni implementa auditoría avanzada.
 - El campo `plazo` es texto libre, sin unidad fija.
 - Hay un único administrador, sin permisos ni operación simultánea desde varios equipos.
+- No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
