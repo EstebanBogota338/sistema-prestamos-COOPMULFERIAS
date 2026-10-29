@@ -19,7 +19,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ## 2. Estado actual: Fases 1, 2, 2.5 y 3 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`.
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`.
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -39,7 +39,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/VentanaAsociados.java](src/main/java/com/lasferias/cooperativa/ui/VentanaAsociados.java) | Barra superior, búsqueda, `JTable` no editable, conteo y acciones |
 | [ui/FormularioAsociado.java](src/main/java/com/lasferias/cooperativa/ui/FormularioAsociado.java) | `JDialog` modal compartido para alta y edición |
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
-| [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel del sistema y abre la ventana en el EDT; `System.exit(1)` si falla la BD |
+| [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
 **Pruebas: 49** (JUnit 5 + `@TempDir`) — 33 de las fases 1–2.5 (`AsociadoDAOTest` 15, `AsociadoServiceTest` 11, `InicializadorBDTest` 4, `FormularioAsociadoTest` 2, `VentanaAsociadosTest` 1) y 16 de la Fase 3 (`AutenticacionServiceTest` 12, `UsuarioDAOTest` 4). Los reportes de surefire de la última ejecución muestran 0 fallos.
 
@@ -74,7 +74,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (33 pruebas previas + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (49 pruebas previas + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -97,7 +97,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1 y 2** | Terminadas. |
+| **Fases 1, 2, 2.5 y 3** | Terminadas. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
 | **Acceso** | El login pide **solo la contraseña**. Hay un único administrador. |
 | **Hash de contraseña** | `org.mindrot:jbcrypt:0.4` (BCrypt). Obligatorio; nunca texto plano ni en logs. |
@@ -153,9 +153,8 @@ No portar HTML, CSS, CDN ni iconos: la UI es Swing.
 ---
 
 ## 6. Fase 2.5 — extracción de `ui/Estilo` (terminada)
-Los colores, `fuente()`, los botones primario y secundario y el borde de campo se extrajeron a `ui/Estilo`. Los márgenes de botón quedaron unificados en 8,15. Verificado: 33 pruebas, 0 fallos, BUILD SUCCESS.
 
-**Pendiente para la Fase 3:** si hacen falta campos de contraseña, agregar un helper en `Estilo` sin modificar `VentanaAsociados` ni `FormularioAsociado`.
+Los colores, `fuente()`, los botones primario y secundario y el borde de campo se extrajeron a `ui/Estilo`. Los márgenes de botón quedaron unificados en 8,15. Verificado: 33 pruebas, 0 fallos, BUILD SUCCESS.
 
 ---
 
@@ -191,6 +190,7 @@ Siguiente tarea: Préstamos (ver sección 12).
 - Dependencias nuevas: solo con justificación y autorización.
 - No cambies el DDL existente ni los nombres de columnas; mapeo `snake_case` → `camelCase`.
 - Commits en español, pequeños y claros (`Fase 3: ...`); no commitear sin pedido explícito.
+- Una rama por fase (fase-N), fusionada a main al terminar. El coder nunca hace push.
 
 ---
 
@@ -202,6 +202,7 @@ Siguiente tarea: Préstamos (ver sección 12).
 4. Al terminar, `mvn exec:java` y comprueba el flujo real. Si no pudiste ver la UI, dilo.
 5. Reporta: archivos creados o modificados, dependencias, comandos con su **salida real**, cuántas pruebas pasan, decisiones tomadas, limitaciones y cualquier diferencia respecto a este archivo.
 6. Si algo contradice el documento o este archivo, o falta un dato imprescindible, detente y pregunta con una pregunta concreta.
+7. El coder no crea el administrador ni modifica la BD real; comprueba el arranque por el título de la ventana y el SHA-256 de la BD antes y después. La prueba manual con login la hace el usuario.
 
 ---
 
@@ -223,7 +224,7 @@ Siguiente tarea: Préstamos (ver sección 12).
 1. **Fase 2.5:** extraer `ui/Estilo` — terminada.
 2. **Fase 3:** login y administrador inicial — terminada.
 3. **Triggers de SQLite** — solo si el usuario autoriza P1.
-4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual.
+4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`.
 5. **Cuotas:** antes de empezar, crear un helper `database/ErroresBD` (p. ej. `esViolacionUnica(SQLException)`) con su prueba y usarlo también en `AsociadoService`, en vez de copiar la comparación por texto del mensaje de error. Bloqueo de edición con pagos en el servicio.
 6. **Pagos:** primero resolver P2 con el usuario. Edición directa en transacción, abonos parciales, sin historial de versiones.
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos.
@@ -235,11 +236,10 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 ### Limitaciones conocidas (documentar en el README final)
 
 - La edición de pagos **no conserva versiones anteriores** ni implementa auditoría (decisión cerrada del documento).
-- No hay cambio de contraseña (si no llega a implementarse) ni bloqueo por intentos fallidos.
+- Sin bloqueo por intentos fallidos.
 - jBCrypt 0.4 no tiene mantenimiento activo y solo considera los primeros 72 bytes de la contraseña; es adecuado para este alcance.
 - `plazo` es texto libre, sin unidad definida.
 - Si se adopta P2 como se recomienda, un registro creado bajo un padre equivocado no puede moverse ni eliminarse.
 - La unicidad del documento en SQLite distingue mayúsculas; el servicio normaliza a mayúsculas antes de guardar.
 - La ruta de la BD se arma con `user.home\AppData\Roaming`, no con la variable `%APPDATA%`; pueden diferir si el perfil está redirigido.
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
-- `Estilo.campoPassword` solo acepta `JPasswordField`: al llegar Préstamos, generalizar a `Estilo.campo(JTextField)`.
