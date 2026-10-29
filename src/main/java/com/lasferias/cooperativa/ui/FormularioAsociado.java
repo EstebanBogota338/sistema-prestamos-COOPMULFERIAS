@@ -3,8 +3,6 @@ package com.lasferias.cooperativa.ui;
 import com.lasferias.cooperativa.model.Asociado;
 import com.lasferias.cooperativa.service.AsociadoService;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -12,8 +10,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.logging.Level;
@@ -29,20 +25,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.border.Border;
 
 public class FormularioAsociado extends JDialog {
 
     private static final Logger LOGGER =
         Logger.getLogger(FormularioAsociado.class.getName());
-    private static final Color FONDO = new Color(0xF5F7F6);
-    private static final Color SUPERFICIE = Color.WHITE;
-    private static final Color TEXTO = new Color(0x212529);
-    private static final Color TEXTO_SECUNDARIO = new Color(0x6B7280);
-    private static final Color BORDE = new Color(0xE2E5E3);
-    private static final Color VERDE = new Color(0x2F8F57);
-    private static final Color VERDE_OSCURO = new Color(0x256F45);
-    private static final Color ERROR = new Color(0xB42318);
 
     private final AsociadoService service;
     private final Asociado asociadoExistente;
@@ -85,19 +72,19 @@ public class FormularioAsociado extends JDialog {
 
     private void construirInterfaz() {
         JPanel raiz = new JPanel(new BorderLayout());
-        raiz.setBackground(FONDO);
+        raiz.setBackground(Estilo.FONDO);
         raiz.setBorder(BorderFactory.createEmptyBorder(22, 22, 20, 22));
 
         JPanel tarjeta = new JPanel(new BorderLayout(0, 18));
-        tarjeta.setBackground(SUPERFICIE);
+        tarjeta.setBackground(Estilo.SUPERFICIE);
         tarjeta.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDE),
+            BorderFactory.createLineBorder(Estilo.BORDE),
             BorderFactory.createEmptyBorder(20, 22, 18, 22)));
 
         JLabel titulo = new JLabel(asociadoExistente == null
             ? "Registrar asociado" : "Actualizar datos del asociado");
-        titulo.setFont(fuente(Font.BOLD, 18));
-        titulo.setForeground(TEXTO);
+        titulo.setFont(Estilo.fuente(Font.BOLD, 18));
+        titulo.setForeground(Estilo.TEXTO);
         tarjeta.add(titulo, BorderLayout.NORTH);
 
         JPanel campos = new JPanel(new GridBagLayout());
@@ -113,11 +100,11 @@ public class FormularioAsociado extends JDialog {
         agregarCampo(campos, restricciones, "Teléfono", telefono,
             "Opcional, solo dígitos entre 7 y 10 caracteres");
 
-        fechaRegistro.setFont(fuente(Font.PLAIN, 13));
-        fechaRegistro.setForeground(TEXTO);
+        fechaRegistro.setFont(Estilo.fuente(Font.PLAIN, 13));
+        fechaRegistro.setForeground(Estilo.TEXTO);
         fechaRegistro.setOpaque(true);
-        fechaRegistro.setBackground(FONDO);
-        fechaRegistro.setBorder(campoBorde());
+        fechaRegistro.setBackground(Estilo.FONDO);
+        fechaRegistro.setBorder(Estilo.bordeCampo());
         fechaRegistro.setPreferredSize(new Dimension(300, 34));
         agregarCampo(campos, restricciones, "Fecha de registro", fechaRegistro,
             "Se asigna automáticamente y no es editable");
@@ -126,15 +113,15 @@ public class FormularioAsociado extends JDialog {
 
         JPanel pie = new JPanel(new BorderLayout(0, 12));
         pie.setOpaque(false);
-        mensajeError.setFont(fuente(Font.PLAIN, 12));
-        mensajeError.setForeground(ERROR);
+        mensajeError.setFont(Estilo.fuente(Font.PLAIN, 12));
+        mensajeError.setForeground(Estilo.ERROR);
         pie.add(mensajeError, BorderLayout.NORTH);
 
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         acciones.setOpaque(false);
         JButton cancelar = new JButton("Cancelar");
-        configurarBotonSecundario(cancelar, true);
-        configurarBotonPrimario(guardar);
+        Estilo.botonSecundario(cancelar);
+        Estilo.botonPrimario(guardar);
         cancelar.addActionListener(e -> dispose());
         guardar.addActionListener(e -> guardar());
         acciones.add(cancelar);
@@ -163,8 +150,8 @@ public class FormularioAsociado extends JDialog {
         etiquetaRestricciones.weightx = 0;
         etiquetaRestricciones.fill = GridBagConstraints.NONE;
         JLabel textoEtiqueta = new JLabel(etiqueta);
-        textoEtiqueta.setFont(fuente(Font.PLAIN, 13));
-        textoEtiqueta.setForeground(TEXTO);
+        textoEtiqueta.setFont(Estilo.fuente(Font.PLAIN, 13));
+        textoEtiqueta.setForeground(Estilo.TEXTO);
         textoEtiqueta.setPreferredSize(new Dimension(125, 34));
         textoEtiqueta.setLabelFor(campo);
         panel.add(textoEtiqueta, etiquetaRestricciones);
@@ -175,8 +162,8 @@ public class FormularioAsociado extends JDialog {
         contenedor.add(campo, BorderLayout.CENTER);
         if (ayuda != null) {
             JLabel ayudaLabel = new JLabel(ayuda);
-            ayudaLabel.setFont(fuente(Font.PLAIN, 11));
-            ayudaLabel.setForeground(TEXTO_SECUNDARIO);
+            ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 11));
+            ayudaLabel.setForeground(Estilo.TEXTO_SECUNDARIO);
             contenedor.add(ayudaLabel, BorderLayout.SOUTH);
         }
 
@@ -189,20 +176,14 @@ public class FormularioAsociado extends JDialog {
     }
 
     private void configurarCampo(JComponent campo) {
-        campo.setFont(fuente(Font.PLAIN, 13));
-        campo.setForeground(TEXTO);
-        campo.setBackground(SUPERFICIE);
+        campo.setFont(Estilo.fuente(Font.PLAIN, 13));
+        campo.setForeground(Estilo.TEXTO);
+        campo.setBackground(Estilo.SUPERFICIE);
         campo.setPreferredSize(new Dimension(300, 34));
         if (campo instanceof JTextField texto) {
-            texto.setBorder(campoBorde());
-            texto.setCaretColor(TEXTO);
+            texto.setBorder(Estilo.bordeCampo());
+            texto.setCaretColor(Estilo.TEXTO);
         }
-    }
-
-    private static Border campoBorde() {
-        return BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDE),
-            BorderFactory.createEmptyBorder(7, 9, 7, 9));
     }
 
     private void cargarDatos() {
@@ -265,49 +246,5 @@ public class FormularioAsociado extends JDialog {
         nombres.setEnabled(habilitado);
         apellidos.setEnabled(habilitado);
         telefono.setEnabled(habilitado);
-    }
-
-    private static Font fuente(int estilo, int tamano) {
-        return new Font("Segoe UI", estilo, tamano);
-    }
-
-    private static void configurarBotonPrimario(JButton boton) {
-        boton.setFont(fuente(Font.BOLD, 13));
-        boton.setForeground(Color.WHITE);
-        boton.setBackground(VERDE);
-        boton.setOpaque(true);
-        boton.setContentAreaFilled(true);
-        boton.setFocusPainted(false);
-        boton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(VERDE),
-            BorderFactory.createEmptyBorder(8, 18, 8, 18)));
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        boton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (boton.isEnabled()) {
-                    boton.setBackground(VERDE_OSCURO);
-                }
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(VERDE);
-            }
-        });
-    }
-
-    private static void configurarBotonSecundario(JButton boton, boolean conBorde) {
-        boton.setFont(fuente(Font.PLAIN, 13));
-        boton.setForeground(TEXTO);
-        boton.setBackground(SUPERFICIE);
-        boton.setOpaque(true);
-        boton.setFocusPainted(false);
-        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        Border margen = BorderFactory.createEmptyBorder(8, 16, 8, 16);
-        boton.setBorder(conBorde
-            ? BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDE), margen)
-            : margen);
     }
 }
