@@ -116,4 +116,9 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - Hay un único administrador, sin permisos ni operación simultánea desde varios equipos.
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
 - Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando).
-- Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error; el selector de asociado usa `...` en vez de `…`.
+- Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error.
+- `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usará la misma regla.
+- En botones primarios deshabilitados el fondo sigue verde y el texto queda casi ilegible; es cosmético y solo ocurre mientras se guarda.
+- `cuota.numero_cuota` no tiene `CHECK` en la base: la validación (`>= 1`) es solo del servicio.
+- El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
+- El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).

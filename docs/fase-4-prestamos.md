@@ -1,6 +1,6 @@
 # Fase 4 — Préstamos: plan e implementación
 
-> **Estado:** Fase 4 **terminada**: backend, UI y validación manual del recorrido completo. Commits `d4dd14a` (backend), `277390e` (UI) y `33b86ac` (correcciones tras la prueba manual).
+> **Estado:** Fase 4 **terminada**: backend, UI y validación manual del recorrido completo. Commits `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación).
 > **Base:** AGENTS.md §12.4; docs/MVP-Cooperativa-Las-Ferias-v3.md §4.2 y §5.2; P2 cerrada en la opción (a).
 > **Rama:** `fase-4`, fusionada a `main` al cerrar la fase.
 
@@ -11,7 +11,7 @@
 - **Validado manualmente:** recorrido login → Principal → Asociados → Préstamos sobre una BD temporal; la BD real no se tocó (mismo SHA-256 antes y después). Se comprobaron montos (`1.5` rechazado; `1.500.000` guardado como `1500000`), fechas, conteos y navegación.
 - **Corregido tras esa prueba (`33b86ac`):** avatar "AD" elidido a `...`, botones primarios con texto blanco sobre blanco, diálogo de asociado recortado por tamaño fijo, y concordancia "1 registro / 1 resultado".
 - **Decisiones aplicadas:** los montos aceptan puntos y espacios como separadores de miles; se validan y luego se eliminan antes de parsear. La fecha inicia vacía con la pista `AAAA-MM-DD`.
-- **Pendiente de pulir (no bloqueante):** el foco no viaja al campo con error tras un guardado fallido; el selector de asociado usa `...` en vez de `…`.
+- **Pendiente de pulir (no bloqueante):** el foco no viaja al campo con error tras un guardado fallido.
 
 ## 1. Objetivo
 
@@ -191,7 +191,7 @@ Crear `PrestamoServiceTest` con `@TempDir`:
 1. `JDialog` modal para alta y edición, con tarjeta blanca y estilos de `Estilo`.
 2. Alta:
    - `JComboBox<Asociado>` no editable, con un `ListCellRenderer` que muestre documento y nombre (no sobrescribir `toString()` en `Asociado`);
-   - primer ítem “Seleccione un asociado…” sin asociado seleccionado; si se guarda así, el servicio responde “Seleccione un asociado válido.”;
+   - primer ítem “Seleccione un asociado…” sin asociado seleccionado; si se guarda así, el formulario responde “Seleccione un asociado válido.” antes de llamar al servicio;
    - si no hay asociados, mostrar un mensaje y no abrir el formulario.
 3. Edición:
    - mostrar el asociado en un `JLabel` de solo lectura;
@@ -276,5 +276,5 @@ No se agregan validaciones cruzadas entre cuotas y préstamo (P3) ni unicidad de
 2. **Columnas y acciones de la tabla**: la propuesta es la mínima; no incluye búsqueda de préstamos.
 3. **Asociado en edición**: se muestra como solo lectura; el servicio rechaza cambios.
 4. **Fecha**: se usará texto ISO y `LocalDate`; no se agrega selector de calendario.
-5. **UI tests**: se adaptó `PanelAsociadosTest`, se agregó `PanelPrestamosTest` y 4 pruebas de entrada en `FormularioPrestamoTest`.
-6. **Rama y commits**: se trabajó en `fase-4` y se fusionó a `main` con `--ff-only` al cerrar; sin push.
+5. **UI tests**: se adaptó `PanelAsociadosTest`, se agregó `PanelPrestamosTest` y 10 pruebas de entrada en `FormularioPrestamoTest`.
+6. **Rama y commits**: se trabajó en `fase-4`, se fusionó a `main` con `--ff-only` al cerrar y el resultado quedó publicado en `origin/main`.
