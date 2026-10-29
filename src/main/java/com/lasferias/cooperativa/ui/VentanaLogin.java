@@ -1,6 +1,5 @@
 package com.lasferias.cooperativa.ui;
 
-import com.lasferias.cooperativa.service.AsociadoService;
 import com.lasferias.cooperativa.service.AutenticacionService;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -123,8 +122,8 @@ public class VentanaLogin extends JFrame {
                 return;
             }
 
-            VentanaAsociados asociados = new VentanaAsociados(new AsociadoService());
-            asociados.setVisible(true);
+            VentanaPrincipal principal = new VentanaPrincipal();
+            principal.setVisible(true);
             dispose();
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE,

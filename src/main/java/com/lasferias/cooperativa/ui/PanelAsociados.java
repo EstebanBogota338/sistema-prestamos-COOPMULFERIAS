@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -24,15 +25,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
-public class VentanaAsociados extends JFrame {
+public class PanelAsociados extends JPanel {
 
     private static final Logger LOGGER =
-        Logger.getLogger(VentanaAsociados.class.getName());
+        Logger.getLogger(PanelAsociados.class.getName());
 
     private final AsociadoService service;
     private final AsociadoTableModel modelo = new AsociadoTableModel();
@@ -42,77 +43,22 @@ public class VentanaAsociados extends JFrame {
     private final JLabel estado = new JLabel();
     private final JButton editar = new JButton("Editar");
 
-    public VentanaAsociados(AsociadoService service) {
-        super("Cooperativa Las Ferias - Asociados");
+    public PanelAsociados(AsociadoService service) {
         this.service = service;
-
-        configurarVentana();
         construirInterfaz();
         cargarAsociados("", null);
     }
 
-    private void configurarVentana() {
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(1000, 680);
-        setMinimumSize(new Dimension(900, 600));
-        setLocationRelativeTo(null);
+    public void refrescar() {
+        cargarAsociados("", null);
     }
 
     private void construirInterfaz() {
-        JPanel raiz = new JPanel(new BorderLayout());
-        raiz.setBackground(Estilo.FONDO);
-        raiz.add(crearBarraSuperior(), BorderLayout.NORTH);
-
-        JPanel contenido = new JPanel(new BorderLayout(0, 18));
-        contenido.setBackground(Estilo.FONDO);
-        contenido.setBorder(BorderFactory.createEmptyBorder(24, 24, 20, 24));
-        contenido.add(crearTarjetaBusqueda(), BorderLayout.NORTH);
-        contenido.add(crearTarjetaTabla(), BorderLayout.CENTER);
-
-        raiz.add(contenido, BorderLayout.CENTER);
-        setContentPane(raiz);
-    }
-
-    private JPanel crearBarraSuperior() {
-        JPanel barra = new JPanel(new BorderLayout());
-        barra.setBackground(Estilo.SUPERFICIE);
-        barra.setPreferredSize(new Dimension(0, 52));
-        barra.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Estilo.BORDE),
-            BorderFactory.createEmptyBorder(0, 20, 0, 20)));
-
-        JLabel nombreApp = new JLabel("Cooperativa Las Ferias");
-        nombreApp.setFont(Estilo.fuente(Font.BOLD, 15));
-        nombreApp.setForeground(Estilo.TEXTO);
-        barra.add(nombreApp, BorderLayout.WEST);
-
-        JLabel pestana = new JLabel("Asociados", SwingConstants.CENTER);
-        pestana.setFont(Estilo.fuente(Font.BOLD, 13));
-        pestana.setForeground(Estilo.VERDE);
-        pestana.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(15, 14, 13, 14),
-            BorderFactory.createMatteBorder(0, 0, 2, 0, Estilo.VERDE)));
-        JPanel centro = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        centro.setOpaque(false);
-        centro.add(pestana);
-        barra.add(centro, BorderLayout.CENTER);
-
-        JLabel administrador = new JLabel("Administrador");
-        administrador.setFont(Estilo.fuente(Font.PLAIN, 13));
-        administrador.setForeground(Estilo.TEXTO_SECUNDARIO);
-        JLabel avatar = new JLabel("AD", SwingConstants.CENTER);
-        avatar.setFont(Estilo.fuente(Font.BOLD, 11));
-        avatar.setForeground(Estilo.VERDE);
-        avatar.setOpaque(true);
-        avatar.setBackground(Estilo.VERDE_SUAVE);
-        avatar.setPreferredSize(new Dimension(30, 30));
-        avatar.setBorder(BorderFactory.createLineBorder(Estilo.VERDE_SUAVE, 8));
-        JPanel usuario = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        usuario.setOpaque(false);
-        usuario.add(avatar);
-        usuario.add(administrador);
-        barra.add(usuario, BorderLayout.EAST);
-        return barra;
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Estilo.FONDO);
+        setBorder(BorderFactory.createEmptyBorder(24, 24, 20, 24));
+        add(crearTarjetaBusqueda(), BorderLayout.NORTH);
+        add(crearTarjetaTabla(), BorderLayout.CENTER);
     }
 
     private JPanel crearTarjetaBusqueda() {
@@ -257,12 +203,17 @@ public class VentanaAsociados extends JFrame {
         tabla.getColumnModel().getColumn(4).setPreferredWidth(145);
     }
 
+    private JFrame propietario() {
+        Window ventana = SwingUtilities.getWindowAncestor(this);
+        return ventana instanceof JFrame frame ? frame : null;
+    }
+
     private void buscar() {
         cargarAsociados(campoBusqueda.getText(), null);
     }
 
     private void nuevoAsociado() {
-        Asociado creado = FormularioAsociado.mostrar(this, service, null);
+        Asociado creado = FormularioAsociado.mostrar(propietario(), service, null);
         if (creado != null) {
             campoBusqueda.setText("");
             cargarAsociados("", "Asociado registrado correctamente.");
@@ -280,7 +231,7 @@ public class VentanaAsociados extends JFrame {
         }
 
         Asociado seleccionado = modelo.getAsociadoEn(fila);
-        Asociado actualizado = FormularioAsociado.mostrar(this, service, seleccionado);
+        Asociado actualizado = FormularioAsociado.mostrar(propietario(), service, seleccionado);
         if (actualizado != null) {
             campoBusqueda.setText("");
             cargarAsociados("", "Asociado actualizado correctamente.");

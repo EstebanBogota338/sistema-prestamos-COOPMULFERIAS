@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 /**
@@ -81,13 +82,17 @@ public final class Estilo {
             BorderFactory.createEmptyBorder(7, 9, 7, 9));
     }
 
-    public static void campoPassword(JPasswordField campo) {
+    public static void campo(JTextField campo) {
         campo.setFont(fuente(Font.PLAIN, 13));
         campo.setForeground(TEXTO);
         campo.setBackground(SUPERFICIE);
         campo.setCaretColor(TEXTO);
         campo.setBorder(bordeCampo());
         campo.setPreferredSize(new Dimension(300, 34));
+    }
+
+    public static void campoPassword(JPasswordField campo) {
+        campo(campo);
     }
 
     private static Border margenBoton() {

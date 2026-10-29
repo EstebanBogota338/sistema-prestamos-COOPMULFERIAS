@@ -19,48 +19,40 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class VentanaAsociadosTest {
+class PanelAsociadosTest {
 
     @TempDir
     Path carpetaTemporal;
 
-    private VentanaAsociados ventana;
-
-    @AfterEach
-    void cerrarVentana() throws Exception {
-        if (ventana != null) {
-            SwingUtilities.invokeAndWait(ventana::dispose);
-        }
-    }
+    private PanelAsociados panel;
 
     @Test
     void diferenciaTotalRegistradoDeResultadosFiltrados() throws Exception {
         AsociadoService service = crearServicioConDosAsociados();
 
-        SwingUtilities.invokeAndWait(() -> ventana = new VentanaAsociados(service));
+        SwingUtilities.invokeAndWait(() -> panel = new PanelAsociados(service));
 
         assertEquals("Asociados registrados (2)", buscarTitulo().getText());
 
         SwingUtilities.invokeAndWait(() -> {
-            componente(ventana, JTextField.class).setText("Ana");
-            boton(ventana, "Buscar").doClick();
+            componente(panel, JTextField.class).setText("Ana");
+            boton(panel, "Buscar").doClick();
         });
 
-        assertEquals(1, componente(ventana, JTable.class).getRowCount());
+        assertEquals(1, componente(panel, JTable.class).getRowCount());
         assertEquals("Resultados de búsqueda (1)", buscarTitulo().getText());
 
-        SwingUtilities.invokeAndWait(() -> boton(ventana, "Limpiar").doClick());
+        SwingUtilities.invokeAndWait(() -> boton(panel, "Limpiar").doClick());
 
-        assertEquals(2, componente(ventana, JTable.class).getRowCount());
+        assertEquals(2, componente(panel, JTable.class).getRowCount());
         assertEquals("Asociados registrados (2)", buscarTitulo().getText());
     }
 
     private AsociadoService crearServicioConDosAsociados() throws SQLException {
-        Path rutaBd = carpetaTemporal.resolve("ventana-asociados.db");
+        Path rutaBd = carpetaTemporal.resolve("panel-asociados.db");
         InicializadorBD.inicializar(rutaBd);
         AsociadoService service = new AsociadoService(new AsociadoDAO(rutaBd));
         service.registrar(new Asociado(
@@ -71,7 +63,7 @@ class VentanaAsociadosTest {
     }
 
     private JLabel buscarTitulo() {
-        return componentes(ventana, JLabel.class).stream()
+        return componentes(panel, JLabel.class).stream()
             .filter(etiqueta -> etiqueta.getText() != null)
             .filter(etiqueta -> etiqueta.getText().startsWith(
                 "Asociados registrados")
