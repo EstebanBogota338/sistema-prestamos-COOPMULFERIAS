@@ -1,6 +1,7 @@
 package com.lasferias.cooperativa.ui;
 
 import com.lasferias.cooperativa.service.AsociadoService;
+import com.lasferias.cooperativa.service.CuotaService;
 import com.lasferias.cooperativa.service.PrestamoService;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -21,18 +22,22 @@ public class VentanaPrincipal extends JFrame {
     private final JPanel contenido = new JPanel(tarjetas);
     private final PanelAsociados panelAsociados;
     private final PanelPrestamos panelPrestamos;
+    private final PanelCuotas panelCuotas;
     private final JButton pestanaAsociados = new JButton("Asociados");
     private final JButton pestanaPrestamos = new JButton("Préstamos");
+    private final JButton pestanaCuotas = new JButton("Cuotas");
 
     public VentanaPrincipal() {
-        this(new AsociadoService(), new PrestamoService());
+        this(new AsociadoService(), new PrestamoService(), new CuotaService());
     }
 
     public VentanaPrincipal(AsociadoService asociadoService,
-                            PrestamoService prestamoService) {
+                            PrestamoService prestamoService,
+                            CuotaService cuotaService) {
         super("Cooperativa Las Ferias - Principal");
         this.panelAsociados = new PanelAsociados(asociadoService);
         this.panelPrestamos = new PanelPrestamos(prestamoService, asociadoService);
+        this.panelCuotas = new PanelCuotas(cuotaService, prestamoService, asociadoService);
         configurarVentana();
         construirInterfaz();
         mostrarAsociados();
@@ -53,6 +58,7 @@ public class VentanaPrincipal extends JFrame {
         contenido.setBackground(Estilo.FONDO);
         contenido.add(panelAsociados, "asociados");
         contenido.add(panelPrestamos, "prestamos");
+        contenido.add(panelCuotas, "cuotas");
         raiz.add(contenido, BorderLayout.CENTER);
         setContentPane(raiz);
     }
@@ -74,10 +80,13 @@ public class VentanaPrincipal extends JFrame {
         centro.setOpaque(false);
         configurarPestana(pestanaAsociados, true);
         configurarPestana(pestanaPrestamos, false);
+        configurarPestana(pestanaCuotas, false);
         pestanaAsociados.addActionListener(e -> mostrarAsociados());
         pestanaPrestamos.addActionListener(e -> mostrarPrestamos());
+        pestanaCuotas.addActionListener(e -> mostrarCuotas());
         centro.add(pestanaAsociados);
         centro.add(pestanaPrestamos);
+        centro.add(pestanaCuotas);
         barra.add(centro, BorderLayout.CENTER);
 
         JLabel administrador = new JLabel("Administrador");
@@ -115,6 +124,7 @@ public class VentanaPrincipal extends JFrame {
         tarjetas.show(contenido, "asociados");
         configurarPestana(pestanaAsociados, true);
         configurarPestana(pestanaPrestamos, false);
+        configurarPestana(pestanaCuotas, false);
         panelAsociados.refrescar();
     }
 
@@ -122,6 +132,15 @@ public class VentanaPrincipal extends JFrame {
         tarjetas.show(contenido, "prestamos");
         configurarPestana(pestanaAsociados, false);
         configurarPestana(pestanaPrestamos, true);
+        configurarPestana(pestanaCuotas, false);
         panelPrestamos.refrescar();
+    }
+
+    private void mostrarCuotas() {
+        tarjetas.show(contenido, "cuotas");
+        configurarPestana(pestanaAsociados, false);
+        configurarPestana(pestanaPrestamos, false);
+        configurarPestana(pestanaCuotas, true);
+        panelCuotas.refrescar();
     }
 }
