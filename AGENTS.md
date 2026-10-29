@@ -17,9 +17,9 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2, 2.5 y 3 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5, 3 y 4 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`.
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI) y `33b86ac` (correcciones tras la prueba manual).
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -36,12 +36,12 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [model/Asociado.java](src/main/java/com/lasferias/cooperativa/model/Asociado.java) | `id`, `documento`, `nombres`, `apellidos`, `telefono`, `fechaRegistro` (`LocalDate`) |
 | [dao/AsociadoDAO.java](src/main/java/com/lasferias/cooperativa/dao/AsociadoDAO.java) | JDBC parametrizado, constructor con `Path`; crear / actualizar / buscarPorDocumento / buscarPorId / buscarPorTexto / listar / existeDocumento. **Sin eliminar** |
 | [service/AsociadoService.java](src/main/java/com/lasferias/cooperativa/service/AsociadoService.java) | Normalización, validaciones, unicidad, fecha automática, traducción de `UNIQUE` |
-| [ui/VentanaAsociados.java](src/main/java/com/lasferias/cooperativa/ui/VentanaAsociados.java) | Barra superior, búsqueda, `JTable` no editable, conteo y acciones |
+| [ui/PanelAsociados.java](src/main/java/com/lasferias/cooperativa/ui/PanelAsociados.java) | Contenido de Asociados: búsqueda, `JTable` no editable, conteo y acciones, sin barra superior; nació de `VentanaAsociados` en la Fase 4 |
 | [ui/FormularioAsociado.java](src/main/java/com/lasferias/cooperativa/ui/FormularioAsociado.java) | `JDialog` modal compartido para alta y edición |
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas: 49** (JUnit 5 + `@TempDir`) — 33 de las fases 1–2.5 (`AsociadoDAOTest` 15, `AsociadoServiceTest` 11, `InicializadorBDTest` 4, `FormularioAsociadoTest` 2, `VentanaAsociadosTest` 1) y 16 de la Fase 3 (`AutenticacionServiceTest` 12, `UsuarioDAOTest` 4). Los reportes de surefire de la última ejecución muestran 0 fallos.
+**Pruebas actuales: 78** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3 y 29 de la Fase 4 (`PrestamoDAOTest` 6, `PrestamoServiceTest` 12, `FormularioPrestamoTest` 10, `PanelPrestamosTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **78 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -54,7 +54,22 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [service/AutenticacionService.java](src/main/java/com/lasferias/cooperativa/service/AutenticacionService.java) | `NOMBRE_ADMINISTRADOR = "admin"`; `debeCrearAdministrador`, `crearAdministrador(contrasena, confirmacion)` con BCrypt y `autenticar(contrasena)` |
 | [ui/VentanaLogin.java](src/main/java/com/lasferias/cooperativa/ui/VentanaLogin.java) | Login con `JPasswordField`, botón **Ingresar** por defecto; cerrar la ventana cierra la app |
 | [ui/VentanaCreacionAdministrador.java](src/main/java/com/lasferias/cooperativa/ui/VentanaCreacionAdministrador.java) | Contraseña y confirmación; al crear el administrador abre el login |
-| [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | `Estilo.campoPassword(JPasswordField)` (solo acepta `JPasswordField`) |
+| [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | `Estilo.campo(JTextField)` y `campoPassword(JPasswordField)` que delega en él |
+
+### Fase 4 — Préstamos (terminada)
+
+| Archivo | Contenido |
+| --- | --- |
+| [model/Prestamo.java](src/main/java/com/lasferias/cooperativa/model/Prestamo.java) | `id`, `asociadoId`, `monto`, `fecha`, `plazo`, `numeroCuotas`, `valorCuota`, `estado` |
+| [dao/PrestamoDAO.java](src/main/java/com/lasferias/cooperativa/dao/PrestamoDAO.java) | JDBC con `Path`; crear, actualizar (devuelve `boolean`), buscarPorId y listar; sin eliminar |
+| [service/PrestamoService.java](src/main/java/com/lasferias/cooperativa/service/PrestamoService.java) | Validaciones, asociado existente, protección del vínculo y actualización controlada |
+| [ui/VentanaPrincipal.java](src/main/java/com/lasferias/cooperativa/ui/VentanaPrincipal.java) | Barra superior, pestañas Asociados/Préstamos y `CardLayout` |
+| [ui/PanelPrestamos.java](src/main/java/com/lasferias/cooperativa/ui/PanelPrestamos.java) | Tabla no editable, acciones Nuevo/Editar/Actualizar y `Map` de asociados |
+| [ui/FormularioPrestamo.java](src/main/java/com/lasferias/cooperativa/ui/FormularioPrestamo.java) | Alta/edición modal, asociado fijo en edición, montos normalizados y fecha ISO |
+| [ui/VentanaLogin.java](src/main/java/com/lasferias/cooperativa/ui/VentanaLogin.java) | Tras autenticar abre `VentanaPrincipal` antes de `dispose()` |
+| Pruebas | `PrestamoDAOTest` 6, `PrestamoServiceTest` 12, `FormularioPrestamoTest` 10, `PanelPrestamosTest` 1; total 29 (suite completa: 78) |
+
+**Prueba manual (Fase 4):** recorrido completo sobre una BD temporal; la real no se tocó (mismo SHA-256 antes y después). Se verificó login, pestañas, alta y edición de asociados, alta de préstamos, montos, fechas y navegación. En `33b86ac` se corrigieron los cuatro defectos visuales detectados: avatar "AD" elidido a `...`, botones primarios con texto blanco sobre blanco, diálogo de asociado con tamaño fijo que recortaba el campo Documento, y concordancia "1 registro / 1 resultado". Queda pendiente de pulir, sin bloquear: el foco no viaja al campo con error y el placeholder del combo usa `...` en vez de `…`.
 
 ### Dependencias (versiones finales)
 
@@ -74,7 +89,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (49 pruebas previas + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (78 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -97,7 +112,8 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1, 2, 2.5 y 3** | Terminadas. |
+| **Fases 1, 2, 2.5, 3 y 4** | Terminadas. |
+| **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
 | **Acceso** | El login pide **solo la contraseña**. Hay un único administrador. |
 | **Hash de contraseña** | `org.mindrot:jbcrypt:0.4` (BCrypt). Obligatorio; nunca texto plano ni en logs. |
@@ -120,7 +136,6 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 | # | Tema | Qué hacer mientras tanto |
 | --- | --- | --- |
 | P1 | **Triggers de SQLite** para "no eliminar" (en `asociado`, `prestamo`, `cuota`, `pago`) y para el bloqueo de edición de cuotas con pagos. Cambio aditivo e idempotente (`CREATE TRIGGER IF NOT EXISTS`), verificado en pruebas manuales con el DDL real. | No agregar triggers ni tocar el DDL. La regla se protege en el servicio. |
-| P2 | **¿Se pueden cambiar vínculos al editar?** (`pago.cuota_id`, `cuota.prestamo_id`, `prestamo.asociado_id`). Sin eliminación, un vínculo mal puesto sería irreparable. Recomendación del arquitecto: no permitirlo y documentarlo como limitación. | *Default provisional:* los vínculos se fijan al crear y los formularios de edición no los modifican. Confirmar con el usuario **antes de implementar Pagos**. |
 | P3 | **Validaciones cruzadas cuota ↔ préstamo** (p. ej. `numero_cuota` ≤ `numero_cuotas` del préstamo; `valor` de cuota distinto de `valor_cuota`). No están en el documento. | No imponerlas. Registrar los valores tal como se ingresan. |
 | P4 | **Unicidad de `numero_recibo`.** Un mismo recibo puede cubrir varias cuotas. | No agregar `UNIQUE`. Solo obligatorio. |
 
@@ -164,7 +179,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: Préstamos (ver sección 12).
+Siguiente tarea: Cuotas (ver §12.5), salvo que autorices antes P1.
 
 ---
 
@@ -224,9 +239,9 @@ Siguiente tarea: Préstamos (ver sección 12).
 1. **Fase 2.5:** extraer `ui/Estilo` — terminada.
 2. **Fase 3:** login y administrador inicial — terminada.
 3. **Triggers de SQLite** — solo si el usuario autoriza P1.
-4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`.
+4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; el asociado se fija al crear y no se puede cambiar al editar (P2 a); `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`. **Fase 4: terminada.**
 5. **Cuotas:** antes de empezar, crear un helper `database/ErroresBD` (p. ej. `esViolacionUnica(SQLException)`) con su prueba y usarlo también en `AsociadoService`, en vez de copiar la comparación por texto del mensaje de error. Bloqueo de edición con pagos en el servicio.
-6. **Pagos:** primero resolver P2 con el usuario. Edición directa en transacción, abonos parciales, sin historial de versiones.
+6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones.
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos.
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD.
 9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones).
@@ -239,7 +254,9 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - Sin bloqueo por intentos fallidos.
 - jBCrypt 0.4 no tiene mantenimiento activo y solo considera los primeros 72 bytes de la contraseña; es adecuado para este alcance.
 - `plazo` es texto libre, sin unidad definida.
-- Si se adopta P2 como se recomienda, un registro creado bajo un padre equivocado no puede moverse ni eliminarse.
+- Los vínculos se fijan al crear (P2 a): un registro creado bajo un padre equivocado no puede moverse ni eliminarse.
 - La unicidad del documento en SQLite distingue mayúsculas; el servicio normaliza a mayúsculas antes de guardar.
 - La ruta de la BD se arma con `user.home\AppData\Roaming`, no con la variable `%APPDATA%`; pueden diferir si el perfil está redirigido.
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
+- Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte de verdad; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando). Es apariencia, no comportamiento.
+- Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error; el placeholder del combo de asociados usa `...` (tres puntos) en vez de `…`.

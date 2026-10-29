@@ -15,11 +15,12 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 2 | Módulo Asociados (modelo, DAO, servicio, pantalla, pruebas) | Terminada |
 | 2.5 | Extracción de estilos compartidos de la interfaz (`ui/Estilo`) | Terminada |
 | 3 | Inicio de sesión y creación del administrador (BCrypt) | Terminada |
-| 4+ | Préstamos, cuotas, pagos, historial, copia de seguridad, datos de demostración | Pendiente |
+| 4 | Préstamos (modelo, DAO, servicio, pantalla, formulario y navegación) | Terminada |
+| 5+ | Cuotas, pagos, historial, copia de seguridad, datos de demostración | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados, con validaciones y persistencia en SQLite; además, inicio de sesión y creación del administrador inicial con la contraseña almacenada como hash BCrypt. **49 pruebas automatizadas.**
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; y módulo de Préstamos con navegación principal, registro, consulta y edición, sin cálculos financieros ni borrado. **78 pruebas automatizadas.** El recorrido completo ya se validó manualmente sobre una base de datos temporal.
 
-**Aún no implementado** (no debe presentarse como operativo): pantallas de préstamos, cuotas y pagos, historial, copia de seguridad y datos de demostración.
+**Aún no implementado** (no debe presentarse como operativo): pantallas de cuotas y pagos, historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md).
 
 ## Requisitos
 
@@ -33,7 +34,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema y módulo de asociados: 33 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación y préstamos: 78 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -53,7 +54,7 @@ Se crea automáticamente en el primer arranque (`CREATE TABLE IF NOT EXISTS`), d
 
 | Tabla | Contenido |
 | --- | --- |
-| `usuario` | Credenciales del administrador (la contraseña se guardará siempre con hash BCrypt). |
+| `usuario` | Credenciales del administrador (contraseña almacenada como hash BCrypt). |
 | `asociado` | Documento único, nombres, apellidos, teléfono, fecha de registro. |
 | `prestamo` | Monto, fecha, plazo, número de cuotas, valor de cuota, estado (Vigente/Finalizado) y FK a asociado. |
 | `cuota` | Número (único dentro de su préstamo), valor, fecha de vencimiento y FK a préstamo. |
@@ -72,20 +73,23 @@ README.md
 docs/
 ├── MVP-Cooperativa-Las-Ferias-v3.md
 ├── prompt-fase-2.md
+├── fase-4-prestamos.md
 └── diseno/home-mockup.html
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
-├── model/     (Asociado, Usuario)
-├── dao/       (AsociadoDAO, UsuarioDAO)
-├── service/   (AsociadoService, AutenticacionService)
-└── ui/        (Estilo, VentanaAsociados, FormularioAsociado, VentanaLogin,
+├── model/     (Asociado, Prestamo, Usuario)
+├── dao/       (AsociadoDAO, PrestamoDAO, UsuarioDAO)
+├── service/   (AsociadoService, AutenticacionService, PrestamoService)
+└── ui/        (Estilo, VentanaPrincipal, PanelAsociados, PanelPrestamos,
+                FormularioAsociado, FormularioPrestamo, VentanaLogin,
                 VentanaCreacionAdministrador)
 src/test/java/com/lasferias/cooperativa/
 ├── database/InicializadorBDTest.java
-├── dao/AsociadoDAOTest.java
-├── service/AsociadoServiceTest.java
-└── ui/        (FormularioAsociadoTest, VentanaAsociadosTest)
+├── dao/       (AsociadoDAOTest, PrestamoDAOTest, UsuarioDAOTest)
+├── service/   (AsociadoServiceTest, AutenticacionServiceTest, PrestamoServiceTest)
+└── ui/        (FormularioAsociadoTest, FormularioPrestamoTest,
+                PanelAsociadosTest, PanelPrestamosTest)
 ```
 
 ## Reglas del producto (resumen)
@@ -108,5 +112,8 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 
 - La edición de pagos **no conserva versiones anteriores** ni implementa auditoría avanzada.
 - El campo `plazo` es texto libre, sin unidad fija.
+- Los vínculos se fijan al crear (P2 a): un préstamo no puede cambiar de asociado al editarse; un vínculo mal puesto no se puede mover ni eliminar.
 - Hay un único administrador, sin permisos ni operación simultánea desde varios equipos.
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
+- Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando).
+- Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error; el selector de asociado usa `...` en vez de `…`.
