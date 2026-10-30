@@ -2,6 +2,7 @@ package com.lasferias.cooperativa.ui;
 
 import com.lasferias.cooperativa.service.AsociadoService;
 import com.lasferias.cooperativa.service.CuotaService;
+import com.lasferias.cooperativa.service.HistorialService;
 import com.lasferias.cooperativa.service.PagoService;
 import com.lasferias.cooperativa.service.PrestamoService;
 import java.awt.BorderLayout;
@@ -25,25 +26,29 @@ public class VentanaPrincipal extends JFrame {
     private final PanelPrestamos panelPrestamos;
     private final PanelCuotas panelCuotas;
     private final PanelPagos panelPagos;
+    private final PanelHistorial panelHistorial;
     private final JButton pestanaAsociados = new JButton("Asociados");
     private final JButton pestanaPrestamos = new JButton("Préstamos");
     private final JButton pestanaCuotas = new JButton("Cuotas");
     private final JButton pestanaPagos = new JButton("Pagos");
+    private final JButton pestanaHistorial = new JButton("Historial");
 
     public VentanaPrincipal() {
         this(new AsociadoService(), new PrestamoService(), new CuotaService(),
-            new PagoService());
+            new PagoService(), new HistorialService());
     }
 
     public VentanaPrincipal(AsociadoService asociadoService,
                             PrestamoService prestamoService,
                             CuotaService cuotaService,
-                            PagoService pagoService) {
+                            PagoService pagoService,
+                            HistorialService historialService) {
         super("Cooperativa Las Ferias - Principal");
         this.panelAsociados = new PanelAsociados(asociadoService);
         this.panelPrestamos = new PanelPrestamos(prestamoService, asociadoService);
         this.panelCuotas = new PanelCuotas(cuotaService, prestamoService, asociadoService);
         this.panelPagos = new PanelPagos(pagoService, cuotaService, prestamoService, asociadoService);
+        this.panelHistorial = new PanelHistorial(historialService, asociadoService);
         configurarVentana();
         construirInterfaz();
         mostrarAsociados();
@@ -66,6 +71,7 @@ public class VentanaPrincipal extends JFrame {
         contenido.add(panelPrestamos, "prestamos");
         contenido.add(panelCuotas, "cuotas");
         contenido.add(panelPagos, "pagos");
+        contenido.add(panelHistorial, "historial");
         raiz.add(contenido, BorderLayout.CENTER);
         setContentPane(raiz);
     }
@@ -89,14 +95,17 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, false);
         configurarPestana(pestanaPagos, false);
+        configurarPestana(pestanaHistorial, false);
         pestanaAsociados.addActionListener(e -> mostrarAsociados());
         pestanaPrestamos.addActionListener(e -> mostrarPrestamos());
         pestanaCuotas.addActionListener(e -> mostrarCuotas());
         pestanaPagos.addActionListener(e -> mostrarPagos());
+        pestanaHistorial.addActionListener(e -> mostrarHistorial());
         centro.add(pestanaAsociados);
         centro.add(pestanaPrestamos);
         centro.add(pestanaCuotas);
         centro.add(pestanaPagos);
+        centro.add(pestanaHistorial);
         barra.add(centro, BorderLayout.CENTER);
 
         JLabel administrador = new JLabel("Administrador");
@@ -136,6 +145,7 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, false);
         configurarPestana(pestanaPagos, false);
+        configurarPestana(pestanaHistorial, false);
         panelAsociados.refrescar();
     }
 
@@ -145,6 +155,7 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPrestamos, true);
         configurarPestana(pestanaCuotas, false);
         configurarPestana(pestanaPagos, false);
+        configurarPestana(pestanaHistorial, false);
         panelPrestamos.refrescar();
     }
 
@@ -154,6 +165,7 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, true);
         configurarPestana(pestanaPagos, false);
+        configurarPestana(pestanaHistorial, false);
         panelCuotas.refrescar();
     }
 
@@ -163,6 +175,17 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, false);
         configurarPestana(pestanaPagos, true);
+        configurarPestana(pestanaHistorial, false);
         panelPagos.refrescar();
+    }
+
+    private void mostrarHistorial() {
+        tarjetas.show(contenido, "historial");
+        configurarPestana(pestanaAsociados, false);
+        configurarPestana(pestanaPrestamos, false);
+        configurarPestana(pestanaCuotas, false);
+        configurarPestana(pestanaPagos, false);
+        configurarPestana(pestanaHistorial, true);
+        panelHistorial.refrescar();
     }
 }
