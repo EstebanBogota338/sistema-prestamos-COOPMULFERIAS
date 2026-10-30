@@ -351,7 +351,8 @@ public class FormularioCuota extends JDialog {
         }
         return asociado.getDocumento() + " - "
             + asociado.getNombres() + " " + asociado.getApellidos()
-            + " - " + prestamo.getFecha() + " - " + prestamo.getMonto();
+            + " - " + prestamo.getFecha() + " - "
+            + Estilo.formatearMoneda(prestamo.getMonto());
     }
 
     // Copiado de FormularioPrestamo para conservar exactamente el mismo parser.

@@ -341,7 +341,8 @@ public class FormularioPago extends JDialog {
         }
         return asociado.getDocumento() + " - "
             + asociado.getNombres() + " " + asociado.getApellidos()
-            + " - " + prestamo.getFecha() + " - " + prestamo.getMonto()
+            + " - " + prestamo.getFecha() + " - "
+            + Estilo.formatearMoneda(prestamo.getMonto())
             + " - Cuota " + cuota.getNumeroCuota();
     }
 

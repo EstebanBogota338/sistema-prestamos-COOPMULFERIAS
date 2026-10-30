@@ -406,7 +406,8 @@ public class PanelHistorial extends JPanel {
             if (prestamo == null) {
                 return "(préstamo no encontrado)";
             }
-            return prestamo.getFecha() + " - " + prestamo.getMonto();
+            return prestamo.getFecha() + " - "
+            + Estilo.formatearMoneda(prestamo.getMonto());
         }
     }
 

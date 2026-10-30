@@ -89,6 +89,8 @@ class PanelHistorialTest {
         assertEquals(1, tablaPrestamos.getRowCount());
         assertEquals(2, tablaCuotas.getRowCount());
         assertEquals(3, tablaPagos.getRowCount());
+        assertEquals("2026-01-01 - 1.000.000",
+            tablaCuotas.getValueAt(0, 0));
 
         assertEquals("Préstamos (1)", buscar(panel, "tituloPrestamos",
             JLabel.class).getText());
