@@ -67,6 +67,42 @@ public final class InicializadorBD {
     private static final String SQL_IDX_PAGO_CUOTA =
         "CREATE INDEX IF NOT EXISTS idx_pago_cuota ON pago(cuota_id)";
 
+    private static final String SQL_TRG_ASOCIADO_SIN_BORRADO = """
+        CREATE TRIGGER IF NOT EXISTS trg_asociado_sin_borrado
+        BEFORE DELETE ON asociado
+        BEGIN
+            SELECT RAISE(ABORT, 'No se permite eliminar registros.');
+        END;""";
+
+    private static final String SQL_TRG_PRESTAMO_SIN_BORRADO = """
+        CREATE TRIGGER IF NOT EXISTS trg_prestamo_sin_borrado
+        BEFORE DELETE ON prestamo
+        BEGIN
+            SELECT RAISE(ABORT, 'No se permite eliminar registros.');
+        END;""";
+
+    private static final String SQL_TRG_CUOTA_SIN_BORRADO = """
+        CREATE TRIGGER IF NOT EXISTS trg_cuota_sin_borrado
+        BEFORE DELETE ON cuota
+        BEGIN
+            SELECT RAISE(ABORT, 'No se permite eliminar registros.');
+        END;""";
+
+    private static final String SQL_TRG_PAGO_SIN_BORRADO = """
+        CREATE TRIGGER IF NOT EXISTS trg_pago_sin_borrado
+        BEFORE DELETE ON pago
+        BEGIN
+            SELECT RAISE(ABORT, 'No se permite eliminar registros.');
+        END;""";
+
+    private static final String SQL_TRG_CUOTA_CON_PAGOS_SIN_EDICION = """
+        CREATE TRIGGER IF NOT EXISTS trg_cuota_con_pagos_sin_edicion
+        BEFORE UPDATE ON cuota
+        WHEN EXISTS (SELECT 1 FROM pago WHERE cuota_id = OLD.id)
+        BEGIN
+            SELECT RAISE(ABORT, 'Esta cuota tiene pagos registrados: no se puede modificar su número, valor ni fecha de vencimiento.');
+        END;""";
+
     public static void inicializar() throws SQLException {
         inicializar(ConexionBD.rutaBaseDatos());
     }
@@ -82,6 +118,11 @@ public final class InicializadorBD {
             st.execute(SQL_IDX_PRESTAMO_ASOCIADO);
             st.execute(SQL_IDX_CUOTA_PRESTAMO);
             st.execute(SQL_IDX_PAGO_CUOTA);
+            st.execute(SQL_TRG_ASOCIADO_SIN_BORRADO);
+            st.execute(SQL_TRG_PRESTAMO_SIN_BORRADO);
+            st.execute(SQL_TRG_CUOTA_SIN_BORRADO);
+            st.execute(SQL_TRG_PAGO_SIN_BORRADO);
+            st.execute(SQL_TRG_CUOTA_CON_PAGOS_SIN_EDICION);
         }
     }
 }

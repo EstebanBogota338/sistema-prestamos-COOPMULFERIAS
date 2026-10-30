@@ -27,6 +27,12 @@ class InicializadorBDTest {
         List.of("usuario", "asociado", "prestamo", "cuota", "pago");
     private static final List<String> INDICES_ESPERADOS =
         List.of("idx_prestamo_asociado", "idx_cuota_prestamo", "idx_pago_cuota");
+    private static final Set<String> TRIGGERS_ESPERADOS = Set.of(
+        "trg_asociado_sin_borrado",
+        "trg_prestamo_sin_borrado",
+        "trg_cuota_sin_borrado",
+        "trg_pago_sin_borrado",
+        "trg_cuota_con_pagos_sin_edicion");
 
     private static final String SQL_TABLAS =
         "SELECT name FROM sqlite_master WHERE type='table'";
@@ -145,6 +151,126 @@ class InicializadorBDTest {
             INSERT INTO pago(cuota_id, fecha_pago, valor, numero_recibo)
             VALUES (?, ?, ?, ?)
             """, cuotaId, "2026-10-22", 0, "REC-001"));
+    }
+
+    @Test
+    void inicializarCreaLosTriggersDeIntegridad() throws SQLException {
+        Path rutaBd = carpetaTemporal.resolve("p1-triggers.db");
+        InicializadorBD.inicializar(rutaBd);
+
+        Set<String> triggers = nombresDeTriggers(rutaBd);
+        assertEquals(TRIGGERS_ESPERADOS.size(), triggers.size());
+        assertTrue(triggers.containsAll(TRIGGERS_ESPERADOS),
+            "Faltan triggers. Encontrados: " + triggers);
+    }
+
+    @Test
+    void inicializarDosVecesNoDuplicaTriggers() throws SQLException {
+        Path rutaBd = carpetaTemporal.resolve("p1-triggers-idempotentes.db");
+        InicializadorBD.inicializar(rutaBd);
+        InicializadorBD.inicializar(rutaBd);
+
+        Set<String> triggers = nombresDeTriggers(rutaBd);
+        assertEquals(TRIGGERS_ESPERADOS.size(), triggers.size());
+        assertTrue(triggers.containsAll(TRIGGERS_ESPERADOS),
+            "Tras inicializar dos veces los triggers cambiaron: " + triggers);
+    }
+
+    @Test
+    void rechazaEliminarEnLasCuatroTablas() throws SQLException {
+        Path rutaBd = carpetaTemporal.resolve("p1-sin-borrado.db");
+        InicializadorBD.inicializar(rutaBd);
+        long[] ids = sembrarCadenaCompleta(rutaBd);
+
+        assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM asociado WHERE id = ?", ids[0]));
+        assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM prestamo WHERE id = ?", ids[1]));
+        assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM cuota WHERE id = ?", ids[2]));
+        assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM pago WHERE id = ?", ids[3]));
+
+        assertEquals(1, contarFilas(rutaBd, "asociado", ids[0]));
+        assertEquals(1, contarFilas(rutaBd, "prestamo", ids[1]));
+        assertEquals(1, contarFilas(rutaBd, "cuota", ids[2]));
+        assertEquals(1, contarFilas(rutaBd, "pago", ids[3]));
+    }
+
+    @Test
+    void rechazaEditarUnaCuotaConPagos() throws SQLException {
+        Path rutaBd = carpetaTemporal.resolve("p1-cuota-con-pagos.db");
+        InicializadorBD.inicializar(rutaBd);
+        long[] ids = sembrarCadenaCompleta(rutaBd);
+        long cuotaId = ids[2];
+
+        assertThrows(SQLException.class, () -> ejecutar(rutaBd, """
+            UPDATE cuota
+            SET numero_cuota = 2, valor = 1, fecha_vencimiento = '2027-01-01'
+            WHERE id = ?
+            """, cuotaId));
+
+        try (Connection cn = ConexionBD.obtenerConexion(rutaBd);
+             PreparedStatement ps = cn.prepareStatement("""
+                 SELECT numero_cuota, valor, fecha_vencimiento
+                 FROM cuota
+                 WHERE id = ?
+                 """)) {
+            ps.setLong(1, cuotaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                assertTrue(rs.next(), "La cuota sembrada desapareció");
+                assertEquals(1, rs.getInt("numero_cuota"));
+                assertEquals(1000L, rs.getLong("valor"));
+                assertEquals("2026-11-22", rs.getString("fecha_vencimiento"));
+            }
+        }
+    }
+
+    private static Set<String> nombresDeTriggers(Path rutaBd) throws SQLException {
+        Set<String> triggers = new LinkedHashSet<>();
+        String sql = "SELECT name FROM sqlite_master WHERE type = 'trigger'";
+        try (Connection cn = ConexionBD.obtenerConexion(rutaBd);
+             Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                triggers.add(rs.getString("name"));
+            }
+        }
+        return triggers;
+    }
+
+    private static long[] sembrarCadenaCompleta(Path rutaBd) throws SQLException {
+        long asociadoId = insertarYObtenerId(rutaBd, """
+            INSERT INTO asociado(documento, nombres, apellidos, telefono, fecha_registro)
+            VALUES (?, ?, ?, ?, ?)
+            """, "10203040", "Ana", "Pérez", null, "2026-10-22");
+        long prestamoId = insertarYObtenerId(rutaBd, """
+            INSERT INTO prestamo(asociado_id, monto, fecha, plazo, numero_cuotas,
+                                 valor_cuota, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, asociadoId, 100_000L, "2026-10-22", "1 mes", 1, 1_000L, "Vigente");
+        long cuotaId = insertarYObtenerId(rutaBd, """
+            INSERT INTO cuota(prestamo_id, numero_cuota, valor, fecha_vencimiento)
+            VALUES (?, ?, ?, ?)
+            """, prestamoId, 1, 1_000L, "2026-11-22");
+        long pagoId = insertarYObtenerId(rutaBd, """
+            INSERT INTO pago(cuota_id, fecha_pago, valor, numero_recibo)
+            VALUES (?, ?, ?, ?)
+            """, cuotaId, "2026-11-30", 500L, "REC-P1");
+        return new long[]{asociadoId, prestamoId, cuotaId, pagoId};
+    }
+
+    private static int contarFilas(Path rutaBd, String tabla, long id)
+            throws SQLException {
+        String sql = "SELECT COUNT(*) FROM " + tabla + " WHERE id = ?";
+        try (Connection cn = ConexionBD.obtenerConexion(rutaBd);
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
     }
 
     private static Set<String> nombresDeTablas(Path rutaBd) throws SQLException {
