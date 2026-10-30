@@ -30,6 +30,8 @@ public final class Estilo {
     public static final Color VERDE_OSCURO = new Color(0x256F45);
     public static final Color VERDE_SUAVE = new Color(0xE8F5EC);
     public static final Color ERROR = new Color(0xB42318);
+    /** Aviso informativo: una regla del sistema, no un error del usuario. */
+    public static final Color AVISO = new Color(0x8A5A00);
 
     private static final int MARGEN_VERTICAL_BOTON = 8;
     private static final int MARGEN_HORIZONTAL_BOTON = 15;

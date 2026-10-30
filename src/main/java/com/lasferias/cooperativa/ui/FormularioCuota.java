@@ -151,7 +151,7 @@ public class FormularioCuota extends JDialog {
         JPanel pie = new JPanel(new BorderLayout(0, 12));
         pie.setOpaque(false);
         avisoBloqueo.setFont(Estilo.fuente(Font.PLAIN, 12));
-        avisoBloqueo.setForeground(Estilo.ERROR);
+        avisoBloqueo.setForeground(Estilo.AVISO);
         avisoBloqueo.setVisible(false);
         mensajeError.setFont(Estilo.fuente(Font.PLAIN, 12));
         mensajeError.setForeground(Estilo.ERROR);
