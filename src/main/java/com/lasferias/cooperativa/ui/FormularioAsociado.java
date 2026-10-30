@@ -162,7 +162,7 @@ public class FormularioAsociado extends JDialog {
         if (ayuda != null) {
             JLabel ayudaLabel = new JLabel(ayuda);
             ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 11));
-            ayudaLabel.setForeground(Estilo.TEXTO_SECUNDARIO);
+            ayudaLabel.setForeground(Estilo.TEXTO_AYUDA);
             contenedor.add(ayudaLabel, BorderLayout.SOUTH);
         }
 

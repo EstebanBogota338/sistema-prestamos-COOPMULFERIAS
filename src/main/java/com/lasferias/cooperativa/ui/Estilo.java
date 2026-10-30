@@ -23,6 +23,8 @@ public final class Estilo {
     public static final Color SUPERFICIE = Color.WHITE;
     public static final Color TEXTO = new Color(0x212529);
     public static final Color TEXTO_SECUNDARIO = new Color(0x6B7280);
+    /** Texto de ayuda bajo los campos (11 px). Más oscuro que TEXTO_SECUNDARIO para ganar contraste. */
+    public static final Color TEXTO_AYUDA = new Color(0x4B5563);
     public static final Color BORDE = new Color(0xE2E5E3);
     public static final Color VERDE = new Color(0x2F8F57);
     public static final Color VERDE_OSCURO = new Color(0x256F45);
