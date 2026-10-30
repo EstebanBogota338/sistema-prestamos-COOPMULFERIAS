@@ -41,7 +41,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas actuales: 120** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5 y 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **120 pruebas y 0 fallos**.
+**Pruebas actuales: 125** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5, 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1) y 5 de P1 (triggers, en `InicializadorBDTest`). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **125 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -123,7 +123,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (120 pruebas actuales + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (125 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -147,6 +147,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 | Tema | Decisión |
 | --- | --- |
 | **Fases 1, 2, 2.5, 3, 4, 5 y 6** | Terminadas. |
+| **Triggers de SQLite (P1)** | **Cerrada.** Seis triggers idempotentes en `InicializadorBD`: no se permite borrar en `asociado`, `prestamo`, `cuota`, `pago` ni `usuario`, y no se puede actualizar una cuota que ya tenga pagos. Commits `9e67a53` y `5addd77`. |
 | **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
 | **Acceso** | El login pide **solo la contraseña**. Hay un único administrador. |
@@ -169,7 +170,6 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | # | Tema | Qué hacer mientras tanto |
 | --- | --- | --- |
-| P1 | **Triggers de SQLite** para "no eliminar" (en `asociado`, `prestamo`, `cuota`, `pago`) y para el bloqueo de edición de cuotas con pagos. Cambio aditivo e idempotente (`CREATE TRIGGER IF NOT EXISTS`), verificado en pruebas manuales con el DDL real. | No agregar triggers ni tocar el DDL. La regla se protege en el servicio. |
 | P3 | **Validaciones cruzadas cuota ↔ préstamo** (p. ej. `numero_cuota` ≤ `numero_cuotas` del préstamo; `valor` de cuota distinto de `valor_cuota`). No están en el documento. | No imponerlas. Registrar los valores tal como se ingresan. |
 | P4 | **Unicidad de `numero_recibo`.** Un mismo recibo puede cubrir varias cuotas. | No agregar `UNIQUE`. Solo obligatorio. |
 
@@ -213,7 +213,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: Historial por asociado (ver §12.7), salvo que autorices antes P1.
+Siguiente tarea: Historial por asociado (ver §12.7).
 
 ---
 
@@ -272,9 +272,9 @@ Siguiente tarea: Historial por asociado (ver §12.7), salvo que autorices antes 
 
 1. **Fase 2.5:** extraer `ui/Estilo` — terminada.
 2. **Fase 3:** login y administrador inicial — terminada.
-3. **Triggers de SQLite** — solo si el usuario autoriza P1.
+3. **Triggers de SQLite** — **terminada (P1)**: seis triggers idempotentes en `InicializadorBD`; el esquema real los recibe en el siguiente arranque, una sola vez.
 4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; el asociado se fija al crear y no se puede cambiar al editar (P2 a); `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`. **Fase 4: terminada.**
-5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) se decide después de Pagos; la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection. **Fase 5: terminada.**
+5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) quedó cerrada (ver §3); la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection. **Fase 5: terminada.**
 6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones. **Fase 6: terminada.**
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos.
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD.

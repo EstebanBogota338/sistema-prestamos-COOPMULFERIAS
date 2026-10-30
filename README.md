@@ -20,7 +20,7 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 6 | Pagos (modelo, DAO, servicio, pantalla y formulario) | Terminada |
 | 7+ | Historial, copia de seguridad y datos de demostración | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; y módulo de Pagos con navegación, registro, consulta y edición, sin cálculos financieros ni borrado. **120 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; y módulo de Pagos con navegación, registro, consulta y edición, sin cálculos financieros ni borrado. **125 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
 **Aún no implementado** (no debe presentarse como operativo): historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md).
 
@@ -36,7 +36,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas y pagos: 120 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas y pagos: 125 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -63,6 +63,11 @@ Se crea automáticamente en el primer arranque (`CREATE TABLE IF NOT EXISTS`), d
 | `pago` | Fecha, valor, número de recibo y FK a cuota. |
 
 Fechas en texto ISO (`YYYY-MM-DD`); montos en pesos colombianos enteros (`INTEGER`). Las claves foráneas se activan en cada conexión y las restricciones (`UNIQUE`, `CHECK`, `FOREIGN KEY`) protegen la integridad además de las validaciones del código.
+
+> El esquema incluye además seis *triggers* que impiden borrar registros desde fuera de la
+> aplicación (`asociado`, `prestamo`, `cuota`, `pago` y `usuario`) y que bloquean la actualización de
+> una cuota que ya tiene pagos. Una base creada antes de esta versión los recibe en el siguiente
+> arranque, una sola vez: el archivo cambia en ese arranque y a partir de ahí queda estable.
 
 ## Arquitectura
 
