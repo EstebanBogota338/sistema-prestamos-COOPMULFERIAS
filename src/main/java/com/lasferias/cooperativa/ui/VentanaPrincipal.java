@@ -72,7 +72,7 @@ public class VentanaPrincipal extends JFrame {
     private void configurarVentana() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(1000, 680);
-        setMinimumSize(new Dimension(900, 600));
+        setMinimumSize(new Dimension(1000, 600));
         setLocationRelativeTo(null);
     }
 
