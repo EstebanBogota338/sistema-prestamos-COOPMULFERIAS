@@ -3,8 +3,8 @@
 -- IMPORTANTE:
 --   * Todos los datos son ficticios.
 --   * Se cargan a mano; la aplicación NUNCA ejecuta este script al arrancar.
---   * Debe ejecutarse sobre una base SIN datos. Los documentos son únicos,
---     así que una segunda ejecución fallará; eso es esperado.
+--   * Debe ejecutarse sobre una base SIN datos: el script fija los identificadores
+--     (1, 2, 3...) y una segunda ejecución fallará por clave duplicada; es esperado.
 --
 -- La base debe tener ya el esquema creado por la aplicación. Ejemplo:
 --   sqlite3 "%USERPROFILE%\AppData\Roaming\CooperativaLasFerias\cooperativa.db" ".read demo/demo.sql"
@@ -47,8 +47,8 @@ INSERT INTO cuota (id, prestamo_id, numero_cuota, valor, fecha_vencimiento) VALU
     (14, 6, 1, 600000, '2026-02-20'),
     (15, 6, 2, 600000, '2026-03-20');
 
--- 12 pagos. Incluye:
---   * un abono parcial en la cuota 5 (100.000 de 350.000);
+-- 13 pagos. Incluye:
+--   * dos abonos parciales en la cuota 5 (100.000 y 30.000 de 350.000);
 --   * el recibo REC-2026-001 repetido en las cuotas 1 y 4 (P4);
 --   * pagos en los dos préstamos Finalizados.
 INSERT INTO pago (id, cuota_id, fecha_pago, valor, numero_recibo) VALUES
@@ -63,6 +63,7 @@ INSERT INTO pago (id, cuota_id, fecha_pago, valor, numero_recibo) VALUES
     (9,  12, '2026-04-06', 450000, 'REC-2026-008'),
     (10, 13, '2026-05-06', 450000, 'REC-2026-009'),
     (11, 14, '2026-02-21', 600000, 'REC-2026-010'),
-    (12, 15, '2026-03-21', 600000, 'REC-2026-011');
+    (12, 15, '2026-03-21', 600000, 'REC-2026-011'),
+    (13, 5,  '2026-04-20',  30000, 'REC-2026-013');
 
 COMMIT;

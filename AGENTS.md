@@ -19,7 +19,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7, 8 y 9 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI); Fase 9 `2e96695` (demo y cierre).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI); Fase 9 `2e96695` (demo y cierre); Cierre MVP (correcciones de la demo).
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -139,7 +139,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [README.md](README.md) | Modificar: configuración inicial, demo, guion y limitaciones |
 | [AGENTS.md](AGENTS.md) | Modificar: cierre y limitaciones |
 
-**Prueba manual final:** pendiente de la validación del tester en el recorrido completo y de la carga de `demo/demo.sql` sobre una base aislada. El script se verificó en una base temporal con 5 asociados, 6 préstamos, 15 cuotas y 12 pagos, `PRAGMA integrity_check = ok` y sin violaciones de FK.
+**Prueba manual final:** recorrido completo por el tester sobre una BD aislada con `demo/demo.sql` cargado; trece comprobaciones en PASA, incluida la restauración de una copia. La BD real conservó su SHA-256. La demo quedó con 5 asociados, 6 préstamos, 15 cuotas y 13 pagos; `PRAGMA integrity_check = ok` y sin violaciones de FK.
 
 ### Dependencias (versiones finales)
 

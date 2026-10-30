@@ -77,15 +77,15 @@ En el primer arranque, si la tabla `usuario` está vacía, la aplicación pide *
 
 ## Datos de demostración
 
-`demo/demo.sql` contiene datos **ficticios** para una demostración: 5 asociados, 6 préstamos (4 Vigentes y 2 Finalizados), 15 cuotas y 12 pagos, con un abono parcial y un recibo repetido en cuotas distintas. Se carga **a mano** y **nunca** al arrancar; no inserta el administrador.
+`demo/demo.sql` contiene datos **ficticios** para una demostración: 5 asociados, 6 préstamos (4 Vigentes y 2 Finalizados), 15 cuotas y 13 pagos, con dos abonos parciales en la cuota 5 y un recibo repetido en cuotas distintas. Se carga **a mano** y **nunca** al arrancar; no inserta el administrador.
 
-Con la aplicación cerrada, desde la carpeta del proyecto y sobre una base ya creada que no tenga los datos de la demo (el script no toca la tabla `usuario`):
+Con la aplicación cerrada, desde la carpeta del proyecto y sobre una base ya creada y **sin datos** (el script no toca la tabla `usuario`):
 
 ```
 sqlite3 "%USERPROFILE%\AppData\Roaming\CooperativaLasFerias\cooperativa.db" ".read demo/demo.sql"
 ```
 
-En PowerShell, usa `$env:USERPROFILE` en lugar de `%USERPROFILE%`. También sirve cualquier cliente SQLite que ejecute el archivo. Si la base es nueva, ábrela una vez para crear el esquema y el administrador, ciérrala y luego carga la demo. El script debe ejecutarse una sola vez: los documentos son únicos y una segunda ejecución fallará.
+En PowerShell, usa `$env:USERPROFILE` en lugar de `%USERPROFILE%`. También sirve cualquier cliente SQLite que ejecute el archivo. Si la base es nueva, ábrela una vez para crear el esquema y el administrador, ciérrala y luego carga la demo. Debe ejecutarse sobre una base **sin datos**: el script fija los identificadores (1, 2, 3…) y una segunda ejecución fallará por clave duplicada; eso es esperado.
 
 Para empezar de cero: cierra la aplicación, borra `cooperativa.db` y vuelve a abrirla; se recrea vacía y pide crear el administrador.
 
