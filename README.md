@@ -16,11 +16,12 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 2.5 | Extracción de estilos compartidos de la interfaz (`ui/Estilo`) | Terminada |
 | 3 | Inicio de sesión y creación del administrador (BCrypt) | Terminada |
 | 4 | Préstamos (modelo, DAO, servicio, pantalla, formulario y navegación) | Terminada |
-| 5+ | Cuotas, pagos, historial, copia de seguridad, datos de demostración | Pendiente |
+| 5 | Cuotas (modelo, DAO, servicio, pantalla y formulario) | Terminada |
+| 6+ | Pagos, historial, copia de seguridad, datos de demostración | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; y módulo de Préstamos con navegación principal, registro, consulta y edición, sin cálculos financieros ni borrado. **78 pruebas automatizadas.** El recorrido completo ya se validó manualmente sobre una base de datos temporal.
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; y módulo de Cuotas con navegación, registro, consulta y edición, sin cálculos financieros ni borrado. **99 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
-**Aún no implementado** (no debe presentarse como operativo): pantallas de cuotas y pagos, historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md).
+**Aún no implementado** (no debe presentarse como operativo): pantalla de pagos, historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md).
 
 ## Requisitos
 
@@ -34,7 +35,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación y préstamos: 78 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos y cuotas: 99 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -74,22 +75,27 @@ docs/
 ├── MVP-Cooperativa-Las-Ferias-v3.md
 ├── prompt-fase-2.md
 ├── fase-4-prestamos.md
+├── fase-5-cuotas.md
 └── diseno/home-mockup.html
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
-├── model/     (Asociado, Prestamo, Usuario)
-├── dao/       (AsociadoDAO, PrestamoDAO, UsuarioDAO)
-├── service/   (AsociadoService, AutenticacionService, PrestamoService)
+├── model/     (Asociado, Prestamo, Cuota, Usuario)
+├── dao/       (AsociadoDAO, PrestamoDAO, CuotaDAO, UsuarioDAO)
+├── service/   (AsociadoService, AutenticacionService, PrestamoService,
+                CuotaService)
 └── ui/        (Estilo, VentanaPrincipal, PanelAsociados, PanelPrestamos,
-                FormularioAsociado, FormularioPrestamo, VentanaLogin,
-                VentanaCreacionAdministrador)
+                PanelCuotas, FormularioAsociado, FormularioPrestamo,
+                FormularioCuota, VentanaLogin, VentanaCreacionAdministrador)
 src/test/java/com/lasferias/cooperativa/
 ├── database/InicializadorBDTest.java
-├── dao/       (AsociadoDAOTest, PrestamoDAOTest, UsuarioDAOTest)
-├── service/   (AsociadoServiceTest, AutenticacionServiceTest, PrestamoServiceTest)
+├── dao/       (AsociadoDAOTest, PrestamoDAOTest, CuotaDAOTest,
+                UsuarioDAOTest)
+├── service/   (AsociadoServiceTest, AutenticacionServiceTest,
+                PrestamoServiceTest, CuotaServiceTest)
 └── ui/        (FormularioAsociadoTest, FormularioPrestamoTest,
-                PanelAsociadosTest, PanelPrestamosTest)
+                FormularioCuotaTest, PanelAsociadosTest, PanelPrestamosTest,
+                PanelCuotasTest)
 ```
 
 ## Reglas del producto (resumen)
@@ -117,7 +123,7 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
 - Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando).
 - Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error.
-- `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usará la misma regla.
+- `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usa la misma regla.
 - En botones primarios deshabilitados el fondo sigue verde y el texto queda casi ilegible; es cosmético y solo ocurre mientras se guarda.
 - `cuota.numero_cuota` no tiene `CHECK` en la base: la validación (`>= 1`) es solo del servicio.
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.

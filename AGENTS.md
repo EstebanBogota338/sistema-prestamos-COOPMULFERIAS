@@ -17,9 +17,9 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2, 2.5, 3 y 4 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5, 3, 4 y 5 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI).
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -41,7 +41,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas actuales: 78** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3 y 29 de la Fase 4 (`PrestamoDAOTest` 6, `PrestamoServiceTest` 12, `FormularioPrestamoTest` 10, `PanelPrestamosTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **78 pruebas y 0 fallos**.
+**Pruebas actuales: 99** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4 y 21 de la Fase 5 (`CuotaDAOTest` 6, `CuotaServiceTest` 9, `FormularioCuotaTest` 5, `PanelCuotasTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **99 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -71,6 +71,23 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 **Prueba manual (Fase 4):** recorrido completo sobre una BD temporal; la real no se tocó (mismo SHA-256 antes y después). Se verificó login, pestañas, alta y edición de asociados, alta de préstamos, montos, fechas y navegación. En `33b86ac` se corrigieron los cuatro defectos visuales detectados: avatar "AD" elidido a `...`, botones primarios con texto blanco sobre blanco, diálogo de asociado con tamaño fijo que recortaba el campo Documento, y concordancia "1 registro / 1 resultado". Queda pendiente de pulir, sin bloquear: el foco no viaja al campo con error.
 
+### Fase 5 — Cuotas (terminada)
+
+| Archivo | Contenido |
+| --- | --- |
+| [model/Cuota.java](src/main/java/com/lasferias/cooperativa/model/Cuota.java) | `id`, `prestamoId`, `numeroCuota`, `valor`, `fechaVencimiento`; sin campos calculados |
+| [dao/CuotaDAO.java](src/main/java/com/lasferias/cooperativa/dao/CuotaDAO.java) | JDBC con `Path`; crear, actualizar condicionado, buscarPorId, listar, listarPorPrestamo, existeNumero y tienePagos; sin eliminar |
+| [service/CuotaService.java](src/main/java/com/lasferias/cooperativa/service/CuotaService.java) | Validaciones, préstamo existente, vínculo fijo, unicidad y bloqueo por pagos |
+| [ui/VentanaPrincipal.java](src/main/java/com/lasferias/cooperativa/ui/VentanaPrincipal.java) | Barra superior y pestañas Asociados/Préstamos/Cuotas |
+| [ui/PanelCuotas.java](src/main/java/com/lasferias/cooperativa/ui/PanelCuotas.java) | Tabla no editable, acciones Nueva cuota/Editar/Actualizar y Map de préstamos y asociados |
+| [ui/FormularioCuota.java](src/main/java/com/lasferias/cooperativa/ui/FormularioCuota.java) | Diálogo modal; préstamo fijo en edición; aviso y bloqueo con pagos |
+| [test/dao/CuotaDAOTest.java](src/test/java/com/lasferias/cooperativa/dao/CuotaDAOTest.java) | Pruebas del DAO |
+| [test/service/CuotaServiceTest.java](src/test/java/com/lasferias/cooperativa/service/CuotaServiceTest.java) | Pruebas de reglas del servicio |
+| [test/ui/FormularioCuotaTest.java](src/test/java/com/lasferias/cooperativa/ui/FormularioCuotaTest.java) | Pruebas del formulario |
+| [test/ui/PanelCuotasTest.java](src/test/java/com/lasferias/cooperativa/ui/PanelCuotasTest.java) | Prueba del panel |
+
+**Prueba manual (Fase 5):** validación manual por el tester sobre una BD aislada (`-Duser.home` a un temporal); la BD real conservó su SHA-256. Trece comprobaciones en PASA: arranque, login, tres pestañas, alta de cuota con `1.500.000` → `1500000`, unicidad por préstamo, nueve mensajes de validación, edición sin pagos, edición bloqueada con pagos, persistencia y huella de la BD real. Notas: el rechazo de cambio de préstamo no es reproducible desde la interfaz y solo lo cubre `CuotaServiceTest.rechazaCambioDePrestamoAlEditar`; el mensaje "Seleccione una cuota de la tabla para editarla." es defensivo porque Editar está deshabilitado sin selección (`PanelCuotas.java:87`, `:119`, `:162`); la carrera entre la comprobación de pagos y el `UPDATE` condicionado no se verifica manualmente, la protege el `UPDATE` atómico y su traducción en el servicio. Nada nuevo pendiente de pulir: rigen las limitaciones de §12.
+
 ### Dependencias (versiones finales)
 
 - `org.xerial:sqlite-jdbc:3.49.1.0`
@@ -89,7 +106,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (78 pruebas actuales + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (99 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -112,7 +129,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1, 2, 2.5, 3 y 4** | Terminadas. |
+| **Fases 1, 2, 2.5, 3, 4 y 5** | Terminadas. |
 | **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
 | **Acceso** | El login pide **solo la contraseña**. Hay un único administrador. |
@@ -179,7 +196,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: Cuotas (ver §12.5), salvo que autorices antes P1.
+Siguiente tarea: Pagos (ver §12.6), salvo que autorices antes P1.
 
 ---
 
@@ -240,7 +257,7 @@ Siguiente tarea: Cuotas (ver §12.5), salvo que autorices antes P1.
 2. **Fase 3:** login y administrador inicial — terminada.
 3. **Triggers de SQLite** — solo si el usuario autoriza P1.
 4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; el asociado se fija al crear y no se puede cambiar al editar (P2 a); `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`. **Fase 4: terminada.**
-5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) se decide después de Pagos; la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection.
+5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) se decide después de Pagos; la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection. **Fase 5: terminada.**
 6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones.
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos.
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD.
@@ -260,7 +277,7 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
 - Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte de verdad; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando). Es apariencia, no comportamiento.
 - Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error.
-- `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usará la misma regla.
+- `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usa la misma regla.
 - En botones primarios deshabilitados el fondo sigue verde y el texto queda casi ilegible; es cosmético y solo ocurre mientras se guarda.
 - `cuota.numero_cuota` no tiene `CHECK` en la base: la validación (`>= 1`) es solo del servicio.
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
