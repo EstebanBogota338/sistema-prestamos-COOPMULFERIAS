@@ -69,18 +69,20 @@ No se implementa en esta fase:
 
 ## 6. Reglas de validación
 
-| Mensaje exacto | Cuándo se produce |
-| --- | --- |
-| `Los datos de la cuota son obligatorios.` | La cuota es `null`. |
-| `Seleccione una cuota válida para editar.` | Se intenta actualizar con `id <= 0`. |
-| `Seleccione un préstamo válido.` | El préstamo no existe o su id es `<= 0`. |
-| `El número de cuota debe ser mayor o igual a 1.` | `numeroCuota < 1`. |
-| `El valor de la cuota debe ser mayor que cero.` | `valor <= 0`. |
-| `La fecha de vencimiento es obligatoria.` | `fechaVencimiento == null`. |
-| `Ya existe una cuota con ese número en este préstamo.` | Duplicado de `(prestamo_id, numero_cuota)` en alta o edición. |
-| `Esta cuota tiene pagos registrados: no se puede modificar su número, valor ni fecha de vencimiento.` | La cuota ya tiene al menos un pago. |
-| `No se puede cambiar el préstamo de la cuota.` | El `prestamoId` recibido difiere del persistido. |
-| `No se encontró la cuota que se desea actualizar.` | El id no existe o el `UPDATE` afecta 0 filas. |
+| Mensaje exacto | Cuándo se produce | Capa que lo emite | ¿Se ve en la UI? |
+| --- | --- | --- | --- |
+| `Los datos de la cuota son obligatorios.` | La cuota es `null`. | Servicio | No: el formulario siempre construye una `Cuota`. |
+| `Seleccione una cuota válida para editar.` | Se intenta actualizar con `id <= 0`. | Servicio | No: **Editar** exige una fila seleccionada. |
+| `Seleccione un préstamo válido.` | El préstamo no existe o su id es `<= 0`. | Formulario y servicio | Sí. |
+| `El número de cuota debe ser mayor o igual a 1.` | `numeroCuota < 1`. | Servicio | Sí: el formulario solo valida vacío y no entero. |
+| `El valor de la cuota debe ser mayor que cero.` | `valor <= 0`. | Servicio | Sí. |
+| `La fecha de vencimiento es obligatoria.` | `fechaVencimiento == null`. | Servicio | **No**: el formulario corta antes con `La fecha es obligatoria.` |
+| `Ya existe una cuota con ese número en este préstamo.` | Duplicado de `(prestamo_id, numero_cuota)` en alta o edición. | Servicio | Sí. |
+| `Esta cuota tiene pagos registrados: no se puede modificar su número, valor ni fecha de vencimiento.` | La cuota ya tiene al menos un pago. | Formulario y servicio | Sí; además el formulario deshabilita los campos. |
+| `No se puede cambiar el préstamo de la cuota.` | El `prestamoId` recibido difiere del persistido. | Servicio | No: el vínculo se muestra como texto fijo. |
+| `No se encontró la cuota que se desea actualizar.` | El id no existe o el `UPDATE` afecta 0 filas. | Servicio | No: no existe borrado que haga desaparecer la fila. |
+
+Los cinco mensajes que **no** se ven en pantalla están cubiertos por `CuotaServiceTest`. Los literales que emite el propio formulario antes de llamar al servicio (número vacío, número no entero, valor vacío, valor con formato inválido, valor demasiado grande, fecha vacía y fecha con formato inválido) están verificados en la puerta de QA de la fase y viven en `ui/FormularioCuota.java`.
 
 ## 7. Pruebas
 
