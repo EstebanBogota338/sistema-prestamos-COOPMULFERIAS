@@ -17,11 +17,12 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 3 | Inicio de sesión y creación del administrador (BCrypt) | Terminada |
 | 4 | Préstamos (modelo, DAO, servicio, pantalla, formulario y navegación) | Terminada |
 | 5 | Cuotas (modelo, DAO, servicio, pantalla y formulario) | Terminada |
-| 6+ | Pagos, historial, copia de seguridad, datos de demostración | Pendiente |
+| 6 | Pagos (modelo, DAO, servicio, pantalla y formulario) | Terminada |
+| 7+ | Historial, copia de seguridad y datos de demostración | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; y módulo de Cuotas con navegación, registro, consulta y edición, sin cálculos financieros ni borrado. **99 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; y módulo de Pagos con navegación, registro, consulta y edición, sin cálculos financieros ni borrado. **120 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
-**Aún no implementado** (no debe presentarse como operativo): pantalla de pagos, historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md).
+**Aún no implementado** (no debe presentarse como operativo): historial, copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md).
 
 ## Requisitos
 
@@ -35,7 +36,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos y cuotas: 99 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas y pagos: 120 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -76,26 +77,29 @@ docs/
 ├── prompt-fase-2.md
 ├── fase-4-prestamos.md
 ├── fase-5-cuotas.md
+├── fase-6-pagos.md
 └── diseno/home-mockup.html
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
-├── model/     (Asociado, Prestamo, Cuota, Usuario)
-├── dao/       (AsociadoDAO, PrestamoDAO, CuotaDAO, UsuarioDAO)
+├── model/     (Asociado, Prestamo, Cuota, Pago, Usuario)
+├── dao/       (AsociadoDAO, PrestamoDAO, CuotaDAO, PagoDAO,
+                UsuarioDAO)
 ├── service/   (AsociadoService, AutenticacionService, PrestamoService,
-                CuotaService)
+                CuotaService, PagoService)
 └── ui/        (Estilo, VentanaPrincipal, PanelAsociados, PanelPrestamos,
-                PanelCuotas, FormularioAsociado, FormularioPrestamo,
-                FormularioCuota, VentanaLogin, VentanaCreacionAdministrador)
+                PanelCuotas, PanelPagos, FormularioAsociado, FormularioPrestamo,
+                FormularioCuota, FormularioPago, VentanaLogin,
+                VentanaCreacionAdministrador)
 src/test/java/com/lasferias/cooperativa/
 ├── database/InicializadorBDTest.java
 ├── dao/       (AsociadoDAOTest, PrestamoDAOTest, CuotaDAOTest,
-                UsuarioDAOTest)
+                PagoDAOTest, UsuarioDAOTest)
 ├── service/   (AsociadoServiceTest, AutenticacionServiceTest,
-                PrestamoServiceTest, CuotaServiceTest)
+                PrestamoServiceTest, CuotaServiceTest, PagoServiceTest)
 └── ui/        (FormularioAsociadoTest, FormularioPrestamoTest,
-                FormularioCuotaTest, PanelAsociadosTest, PanelPrestamosTest,
-                PanelCuotasTest)
+                FormularioCuotaTest, FormularioPagoTest, PanelAsociadosTest,
+                PanelPrestamosTest, PanelCuotasTest, PanelPagosTest)
 ```
 
 ## Reglas del producto (resumen)
@@ -128,3 +132,4 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - `cuota.numero_cuota` no tiene `CHECK` en la base: la validación (`>= 1`) es solo del servicio.
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
 - El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).
+- En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.

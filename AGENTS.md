@@ -17,9 +17,9 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2, 2.5, 3, 4 y 5 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5 y 6 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI).
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -41,7 +41,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas actuales: 99** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4 y 21 de la Fase 5 (`CuotaDAOTest` 6, `CuotaServiceTest` 9, `FormularioCuotaTest` 5, `PanelCuotasTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **99 pruebas y 0 fallos**.
+**Pruebas actuales: 120** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5 y 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **120 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -88,6 +88,23 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 **Prueba manual (Fase 5):** validación manual por el tester sobre una BD aislada (`-Duser.home` a un temporal); la BD real conservó su SHA-256. Trece comprobaciones en PASA: arranque, login, tres pestañas, alta de cuota con `1.500.000` → `1500000`, unicidad por préstamo, nueve mensajes de validación, edición sin pagos, edición bloqueada con pagos, persistencia y huella de la BD real. Notas: el rechazo de cambio de préstamo no es reproducible desde la interfaz y solo lo cubre `CuotaServiceTest.rechazaCambioDePrestamoAlEditar`; el mensaje "Seleccione una cuota de la tabla para editarla." es defensivo porque Editar está deshabilitado sin selección (`PanelCuotas.java:87`, `:119`, `:162`); la carrera entre la comprobación de pagos y el `UPDATE` condicionado no se verifica manualmente, la protege el `UPDATE` atómico y su traducción en el servicio. Nada nuevo pendiente de pulir: rigen las limitaciones de §12.
 
+### Fase 6 — Pagos (terminada)
+
+| Archivo | Contenido |
+| --- | --- |
+| [model/Pago.java](src/main/java/com/lasferias/cooperativa/model/Pago.java) | `id`, `cuotaId`, `fechaPago`, `valor`, `numeroRecibo` |
+| [dao/PagoDAO.java](src/main/java/com/lasferias/cooperativa/dao/PagoDAO.java) | JDBC con `Path`; crear, actualizar en transacción, buscarPorId, listar y listarPorCuota; sin eliminar |
+| [service/PagoService.java](src/main/java/com/lasferias/cooperativa/service/PagoService.java) | Validaciones, cuota existente, vínculo fijo y edición controlada |
+| [ui/VentanaPrincipal.java](src/main/java/com/lasferias/cooperativa/ui/VentanaPrincipal.java) | Barra superior y pestañas Asociados/Préstamos/Cuotas/Pagos |
+| [ui/PanelPagos.java](src/main/java/com/lasferias/cooperativa/ui/PanelPagos.java) | Tabla no editable con todos los pagos y acciones Nuevo/Editar/Actualizar |
+| [ui/FormularioPago.java](src/main/java/com/lasferias/cooperativa/ui/FormularioPago.java) | Alta/edición modal; cuota fija en edición y parser de montos/fecha |
+| [test/dao/PagoDAOTest.java](src/test/java/com/lasferias/cooperativa/dao/PagoDAOTest.java) | Pruebas del DAO |
+| [test/service/PagoServiceTest.java](src/test/java/com/lasferias/cooperativa/service/PagoServiceTest.java) | Pruebas de reglas del servicio |
+| [test/ui/FormularioPagoTest.java](src/test/java/com/lasferias/cooperativa/ui/FormularioPagoTest.java) | Pruebas del formulario |
+| [test/ui/PanelPagosTest.java](src/test/java/com/lasferias/cooperativa/ui/PanelPagosTest.java) | Prueba del panel |
+
+**Prueba manual (Fase 6):** validación manual por el tester sobre una BD aislada (`-Duser.home` a un temporal); la BD real conservó su SHA-256. Catorce comprobaciones en PASA: arranque, login, cuatro pestañas, aviso con cero cuotas, alta con abono parcial, recibo con `trim`, validaciones, edición conservando la cuota, bloqueo de la cuota en Cuotas, pago aún editable, mismo recibo en dos pagos, persistencia y huella de la BD real. Notas: el bloqueo de cuotas se validó por interfaz por primera vez en esta fase (aviso literal, tres campos y Guardar deshabilitados; el pago sigue editable y Cancelar no altera la cuota); `construirPago` valida cuota → fecha → valor → recibo, por lo que con varios campos vacíos sale primero la fecha, a diferencia de Préstamos y Cuotas; el combo de cuota trunca la etiqueta cerrada (`... - Cuo…`) y exige dos gestos para elegir; no se verificaron el `rollback` ante un fallo real de BD ni el mensaje de cambio de cuota desde la UI, porque el vínculo es texto fijo.
+
 ### Dependencias (versiones finales)
 
 - `org.xerial:sqlite-jdbc:3.49.1.0`
@@ -106,7 +123,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (99 pruebas actuales + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (120 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -129,7 +146,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1, 2, 2.5, 3, 4 y 5** | Terminadas. |
+| **Fases 1, 2, 2.5, 3, 4, 5 y 6** | Terminadas. |
 | **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
 | **Acceso** | El login pide **solo la contraseña**. Hay un único administrador. |
@@ -196,7 +213,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: Pagos (ver §12.6), salvo que autorices antes P1.
+Siguiente tarea: Historial por asociado (ver §12.7), salvo que autorices antes P1.
 
 ---
 
@@ -258,7 +275,7 @@ Siguiente tarea: Pagos (ver §12.6), salvo que autorices antes P1.
 3. **Triggers de SQLite** — solo si el usuario autoriza P1.
 4. **Préstamos:** introduce `VentanaPrincipal` (barra superior y navegación por paneles) y convierte `VentanaAsociados` en `PanelAsociados`, manteniendo las pruebas en verde. Préstamo vinculado a un asociado existente; el asociado se fija al crear y no se puede cambiar al editar (P2 a); `plazo` texto libre; `estado` Vigente/Finalizado manual; `valor_cuota` manual. Generalizar `Estilo.campoPassword` a `Estilo.campo(JTextField)`. **Fase 4: terminada.**
 5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) se decide después de Pagos; la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection. **Fase 5: terminada.**
-6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones.
+6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones. **Fase 6: terminada.**
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos.
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD.
 9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones).
@@ -282,3 +299,4 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - `cuota.numero_cuota` no tiene `CHECK` en la base: la validación (`>= 1`) es solo del servicio.
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
 - El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).
+- En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.
