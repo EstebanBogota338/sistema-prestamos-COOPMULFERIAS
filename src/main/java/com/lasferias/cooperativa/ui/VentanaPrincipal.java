@@ -2,6 +2,7 @@ package com.lasferias.cooperativa.ui;
 
 import com.lasferias.cooperativa.service.AsociadoService;
 import com.lasferias.cooperativa.service.CuotaService;
+import com.lasferias.cooperativa.service.PagoService;
 import com.lasferias.cooperativa.service.PrestamoService;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -23,21 +24,26 @@ public class VentanaPrincipal extends JFrame {
     private final PanelAsociados panelAsociados;
     private final PanelPrestamos panelPrestamos;
     private final PanelCuotas panelCuotas;
+    private final PanelPagos panelPagos;
     private final JButton pestanaAsociados = new JButton("Asociados");
     private final JButton pestanaPrestamos = new JButton("Préstamos");
     private final JButton pestanaCuotas = new JButton("Cuotas");
+    private final JButton pestanaPagos = new JButton("Pagos");
 
     public VentanaPrincipal() {
-        this(new AsociadoService(), new PrestamoService(), new CuotaService());
+        this(new AsociadoService(), new PrestamoService(), new CuotaService(),
+            new PagoService());
     }
 
     public VentanaPrincipal(AsociadoService asociadoService,
                             PrestamoService prestamoService,
-                            CuotaService cuotaService) {
+                            CuotaService cuotaService,
+                            PagoService pagoService) {
         super("Cooperativa Las Ferias - Principal");
         this.panelAsociados = new PanelAsociados(asociadoService);
         this.panelPrestamos = new PanelPrestamos(prestamoService, asociadoService);
         this.panelCuotas = new PanelCuotas(cuotaService, prestamoService, asociadoService);
+        this.panelPagos = new PanelPagos(pagoService, cuotaService, prestamoService, asociadoService);
         configurarVentana();
         construirInterfaz();
         mostrarAsociados();
@@ -59,6 +65,7 @@ public class VentanaPrincipal extends JFrame {
         contenido.add(panelAsociados, "asociados");
         contenido.add(panelPrestamos, "prestamos");
         contenido.add(panelCuotas, "cuotas");
+        contenido.add(panelPagos, "pagos");
         raiz.add(contenido, BorderLayout.CENTER);
         setContentPane(raiz);
     }
@@ -81,12 +88,15 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaAsociados, true);
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, false);
+        configurarPestana(pestanaPagos, false);
         pestanaAsociados.addActionListener(e -> mostrarAsociados());
         pestanaPrestamos.addActionListener(e -> mostrarPrestamos());
         pestanaCuotas.addActionListener(e -> mostrarCuotas());
+        pestanaPagos.addActionListener(e -> mostrarPagos());
         centro.add(pestanaAsociados);
         centro.add(pestanaPrestamos);
         centro.add(pestanaCuotas);
+        centro.add(pestanaPagos);
         barra.add(centro, BorderLayout.CENTER);
 
         JLabel administrador = new JLabel("Administrador");
@@ -125,6 +135,7 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaAsociados, true);
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, false);
+        configurarPestana(pestanaPagos, false);
         panelAsociados.refrescar();
     }
 
@@ -133,6 +144,7 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaAsociados, false);
         configurarPestana(pestanaPrestamos, true);
         configurarPestana(pestanaCuotas, false);
+        configurarPestana(pestanaPagos, false);
         panelPrestamos.refrescar();
     }
 
@@ -141,6 +153,16 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaAsociados, false);
         configurarPestana(pestanaPrestamos, false);
         configurarPestana(pestanaCuotas, true);
+        configurarPestana(pestanaPagos, false);
         panelCuotas.refrescar();
+    }
+
+    private void mostrarPagos() {
+        tarjetas.show(contenido, "pagos");
+        configurarPestana(pestanaAsociados, false);
+        configurarPestana(pestanaPrestamos, false);
+        configurarPestana(pestanaCuotas, false);
+        configurarPestana(pestanaPagos, true);
+        panelPagos.refrescar();
     }
 }
