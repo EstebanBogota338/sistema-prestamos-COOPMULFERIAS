@@ -32,6 +32,7 @@ class InicializadorBDTest {
         "trg_prestamo_sin_borrado",
         "trg_cuota_sin_borrado",
         "trg_pago_sin_borrado",
+        "trg_usuario_sin_borrado",
         "trg_cuota_con_pagos_sin_edicion");
 
     private static final String SQL_TABLAS =
@@ -177,24 +178,53 @@ class InicializadorBDTest {
     }
 
     @Test
-    void rechazaEliminarEnLasCuatroTablas() throws SQLException {
+    void rechazaEliminarEnLasCincoTablas() throws SQLException {
         Path rutaBd = carpetaTemporal.resolve("p1-sin-borrado.db");
         InicializadorBD.inicializar(rutaBd);
         long[] ids = sembrarCadenaCompleta(rutaBd);
+        long asociadoId = ids[0];
+        long prestamoId = ids[1];
+        long pagoId = ids[3];
 
-        assertThrows(SQLException.class,
-            () -> ejecutar(rutaBd, "DELETE FROM asociado WHERE id = ?", ids[0]));
-        assertThrows(SQLException.class,
-            () -> ejecutar(rutaBd, "DELETE FROM prestamo WHERE id = ?", ids[1]));
-        assertThrows(SQLException.class,
-            () -> ejecutar(rutaBd, "DELETE FROM cuota WHERE id = ?", ids[2]));
-        assertThrows(SQLException.class,
-            () -> ejecutar(rutaBd, "DELETE FROM pago WHERE id = ?", ids[3]));
+        long asociadoSinHijos = insertarYObtenerId(rutaBd, """
+            INSERT INTO asociado(documento, nombres, apellidos, telefono, fecha_registro)
+            VALUES (?, ?, ?, ?, ?)
+            """, "99887766", "Luis", "Gómez", null, "2026-10-22");
+        long prestamoSinCuotas = insertarYObtenerId(rutaBd, """
+            INSERT INTO prestamo(asociado_id, monto, fecha, plazo, numero_cuotas,
+                                 valor_cuota, estado)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, asociadoId, 200_000L, "2026-10-22", "1 mes", 1, 1_000L, "Vigente");
+        long cuotaSinPagos = insertarYObtenerId(rutaBd, """
+            INSERT INTO cuota(prestamo_id, numero_cuota, valor, fecha_vencimiento)
+            VALUES (?, ?, ?, ?)
+            """, prestamoId, 2, 1_000L, "2026-12-22");
+        long usuarioId = insertarYObtenerId(rutaBd, """
+            INSERT INTO usuario(nombre_usuario, contrasena_hash)
+            VALUES (?, ?)
+            """, "qa-admin", "hash-de-prueba");
 
-        assertEquals(1, contarFilas(rutaBd, "asociado", ids[0]));
-        assertEquals(1, contarFilas(rutaBd, "prestamo", ids[1]));
-        assertEquals(1, contarFilas(rutaBd, "cuota", ids[2]));
-        assertEquals(1, contarFilas(rutaBd, "pago", ids[3]));
+        SQLException error = assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM asociado WHERE id = ?", asociadoSinHijos));
+        assertMensajeTrigger(error);
+        error = assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM prestamo WHERE id = ?", prestamoSinCuotas));
+        assertMensajeTrigger(error);
+        error = assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM cuota WHERE id = ?", cuotaSinPagos));
+        assertMensajeTrigger(error);
+        error = assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM pago WHERE id = ?", pagoId));
+        assertMensajeTrigger(error);
+        error = assertThrows(SQLException.class,
+            () -> ejecutar(rutaBd, "DELETE FROM usuario WHERE id = ?", usuarioId));
+        assertMensajeTrigger(error);
+
+        assertEquals(1, contarFilas(rutaBd, "asociado", asociadoSinHijos));
+        assertEquals(1, contarFilas(rutaBd, "prestamo", prestamoSinCuotas));
+        assertEquals(1, contarFilas(rutaBd, "cuota", cuotaSinPagos));
+        assertEquals(1, contarFilas(rutaBd, "pago", pagoId));
+        assertEquals(1, contarFilas(rutaBd, "usuario", usuarioId));
     }
 
     @Test
@@ -224,6 +254,24 @@ class InicializadorBDTest {
                 assertEquals("2026-11-22", rs.getString("fecha_vencimiento"));
             }
         }
+    }
+
+    @Test
+    void sinElTriggerElBorradoDeUnaFilaHojaSeriaPosible() throws SQLException {
+        Path rutaBd = carpetaTemporal.resolve("p1-pago-sin-trigger.db");
+        InicializadorBD.inicializar(rutaBd);
+        long[] ids = sembrarCadenaCompleta(rutaBd);
+        long pagoId = ids[3];
+
+        ejecutar(rutaBd, "DROP TRIGGER trg_pago_sin_borrado");
+        ejecutar(rutaBd, "DELETE FROM pago WHERE id = ?", pagoId);
+
+        assertEquals(0, contarFilas(rutaBd, "pago", pagoId));
+    }
+
+    private static void assertMensajeTrigger(SQLException error) {
+        assertTrue(error.getMessage().contains("No se permite eliminar registros."),
+            "El rechazo no vino del trigger: " + error.getMessage());
     }
 
     private static Set<String> nombresDeTriggers(Path rutaBd) throws SQLException {

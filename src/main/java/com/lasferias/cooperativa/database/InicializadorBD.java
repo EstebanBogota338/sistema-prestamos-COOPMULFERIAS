@@ -95,6 +95,13 @@ public final class InicializadorBD {
             SELECT RAISE(ABORT, 'No se permite eliminar registros.');
         END;""";
 
+    private static final String SQL_TRG_USUARIO_SIN_BORRADO = """
+        CREATE TRIGGER IF NOT EXISTS trg_usuario_sin_borrado
+        BEFORE DELETE ON usuario
+        BEGIN
+            SELECT RAISE(ABORT, 'No se permite eliminar registros.');
+        END;""";
+
     private static final String SQL_TRG_CUOTA_CON_PAGOS_SIN_EDICION = """
         CREATE TRIGGER IF NOT EXISTS trg_cuota_con_pagos_sin_edicion
         BEFORE UPDATE ON cuota
@@ -122,6 +129,7 @@ public final class InicializadorBD {
             st.execute(SQL_TRG_PRESTAMO_SIN_BORRADO);
             st.execute(SQL_TRG_CUOTA_SIN_BORRADO);
             st.execute(SQL_TRG_PAGO_SIN_BORRADO);
+            st.execute(SQL_TRG_USUARIO_SIN_BORRADO);
             st.execute(SQL_TRG_CUOTA_CON_PAGOS_SIN_EDICION);
         }
     }
