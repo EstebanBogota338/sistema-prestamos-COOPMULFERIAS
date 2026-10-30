@@ -19,11 +19,12 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 5 | Cuotas (modelo, DAO, servicio, pantalla y formulario) | Terminada |
 | 6 | Pagos (modelo, DAO, servicio, pantalla y formulario) | Terminada |
 | 7 | Historial por asociado (consulta) | Terminada |
-| 8+ | Copia de seguridad y datos de demostración | Pendiente |
+| 8 | Copia de seguridad desde la interfaz | Terminada |
+| 9+ | Datos de demostración y documentación final | Pendiente |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; módulo de Pagos con navegación, registro, consulta y edición; e historial por asociado con tres tablas encadenadas, sin cálculos financieros ni borrado. **132 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; módulo de Pagos con navegación, registro, consulta y edición; historial por asociado con tres tablas encadenadas; y copia de seguridad desde la barra superior, sin cálculos financieros ni borrado. **139 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
-**Aún no implementado** (no debe presentarse como operativo): copia de seguridad y datos de demostración. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md). Detalle de la Fase 7: [docs/fase-7-historial.md](docs/fase-7-historial.md).
+**Aún no implementado** (no debe presentarse como operativo): datos de demostración y documentación final. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md). Detalle de la Fase 7: [docs/fase-7-historial.md](docs/fase-7-historial.md). Detalle de la Fase 8: [docs/fase-8-copia.md](docs/fase-8-copia.md).
 
 ## Requisitos
 
@@ -37,7 +38,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas, pagos e historial: 132 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas, pagos, historial y copia: 139 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -85,15 +86,17 @@ docs/
 ├── fase-5-cuotas.md
 ├── fase-6-pagos.md
 ├── fase-7-historial.md
+├── fase-8-copia.md
 └── diseno/home-mockup.html
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
 ├── model/     (Asociado, Prestamo, Cuota, Pago, Usuario)
 ├── dao/       (AsociadoDAO, PrestamoDAO, CuotaDAO, PagoDAO,
-                HistorialDAO, UsuarioDAO)
+                HistorialDAO, CopiaSeguridadDAO, UsuarioDAO)
 ├── service/   (AsociadoService, AutenticacionService, PrestamoService,
-                CuotaService, PagoService, HistorialService)
+                CuotaService, PagoService, HistorialService,
+                CopiaSeguridadService)
 └── ui/        (Estilo, VentanaPrincipal, PanelAsociados, PanelPrestamos,
                 PanelCuotas, PanelPagos, PanelHistorial, FormularioAsociado,
                 FormularioPrestamo, FormularioCuota, FormularioPago, VentanaLogin,
@@ -101,10 +104,11 @@ src/main/java/com/lasferias/cooperativa/
 src/test/java/com/lasferias/cooperativa/
 ├── database/InicializadorBDTest.java
 ├── dao/       (AsociadoDAOTest, PrestamoDAOTest, CuotaDAOTest,
-                PagoDAOTest, HistorialDAOTest, UsuarioDAOTest)
+                PagoDAOTest, HistorialDAOTest, CopiaSeguridadDAOTest,
+                UsuarioDAOTest)
 ├── service/   (AsociadoServiceTest, AutenticacionServiceTest,
                 PrestamoServiceTest, CuotaServiceTest, PagoServiceTest,
-                HistorialServiceTest)
+                HistorialServiceTest, CopiaSeguridadServiceTest)
 └── ui/        (FormularioAsociadoTest, FormularioPrestamoTest,
                 FormularioCuotaTest, FormularioPagoTest, PanelAsociadosTest,
                 PanelPrestamosTest, PanelCuotasTest, PanelPagosTest,
@@ -123,7 +127,22 @@ src/test/java/com/lasferias/cooperativa/
 
 ## Copia de seguridad y recuperación
 
-*Pendiente.* Se documentará aquí el procedimiento completo cuando se implemente la copia desde la interfaz.
+> **Crear la copia.** Con la aplicación abierta, pulsa **«Copia de seguridad»** en la barra superior y
+> elige dónde guardarla; el nombre sugerido incluye la fecha (`cooperativa-AAAA-MM-DD.db`). Si eliges
+> un archivo que ya existe, la aplicación pide confirmación antes de reemplazarlo. La copia se genera
+> con `VACUUM INTO`, de modo que es consistente aunque haya datos recién guardados.
+>
+> **Restaurar la copia.** La recuperación es manual y **con la aplicación cerrada**:
+>
+> 1. Cierra la aplicación.
+> 2. Abre `%USERPROFILE%\AppData\Roaming\CooperativaLasFerias\`.
+> 3. Renombra `cooperativa.db` a `cooperativa-antes.db` (no lo borres todavía).
+> 4. Copia tu copia de seguridad en esa carpeta y renómbrala a `cooperativa.db`.
+> 5. Abre la aplicación y verifica los datos. Si algo no cuadra, cierra y devuelve el nombre al archivo
+>    `cooperativa-antes.db`.
+>
+> La copia contiene la base completa: administrador, asociados, préstamos, cuotas, pagos e historial.
+> Restaurar una copia **reemplaza todo lo registrado después de esa copia**: no hay fusión de datos.
 
 ## Limitaciones conocidas
 
@@ -143,3 +162,4 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).
 - En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.
 - En la pestaña Historial, las tres tablas reparten la altura a partes iguales, así que con varios pagos hay que desplazarse para verlos todos. Cosmético.
+- Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.

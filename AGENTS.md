@@ -17,9 +17,9 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6 y 7 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7 y 8 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI).
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -41,7 +41,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas actuales: 132** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5, 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1), 5 de P1 (triggers, en `InicializadorBDTest`) y 7 de la Fase 7 (`HistorialDAOTest` 4, `HistorialServiceTest` 2, `PanelHistorialTest` 1). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **132 pruebas y 0 fallos**.
+**Pruebas actuales: 139** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5, 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1), 5 de P1 (triggers, en `InicializadorBDTest`), 7 de la Fase 7 (`HistorialDAOTest` 4, `HistorialServiceTest` 2, `PanelHistorialTest` 1) y 7 de la Fase 8 (`CopiaSeguridadDAOTest` 2, `CopiaSeguridadServiceTest` 5). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **139 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -119,6 +119,18 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 **Prueba manual (Fase 7):** validación por el tester sobre una BD aislada sembrada por script, con dos asociados de historiales distintos y acotada a la pestaña Historial; la BD real conservó su SHA-256. Once comprobaciones en PASA. Notas: una cuota con dos pagos se lista una sola vez porque `listarCuotas` no se une con `pago`; el combo ordena por apellidos con el `Collator` es-CO; las tres tablas reparten la altura a partes iguales, por lo que con varios pagos hay que desplazarse (cosmético); no se repitió la regresión de los cuatro módulos anteriores, ya validados en sus fases.
 
+### Fase 8 — Copia de seguridad (terminada)
+
+| Archivo | Acción |
+| --- | --- |
+| [dao/CopiaSeguridadDAO.java](src/main/java/com/lasferias/cooperativa/dao/CopiaSeguridadDAO.java) | Crear: `VACUUM INTO ?` |
+| [service/CopiaSeguridadService.java](src/main/java/com/lasferias/cooperativa/service/CopiaSeguridadService.java) | Crear: validaciones y sobrescritura |
+| [ui/VentanaPrincipal.java](src/main/java/com/lasferias/cooperativa/ui/VentanaPrincipal.java) | Modificar: botón y flujo del selector |
+| [test/dao/CopiaSeguridadDAOTest.java](src/test/java/com/lasferias/cooperativa/dao/CopiaSeguridadDAOTest.java) | Crear |
+| [test/service/CopiaSeguridadServiceTest.java](src/test/java/com/lasferias/cooperativa/service/CopiaSeguridadServiceTest.java) | Crear |
+
+**Prueba manual (Fase 8):** validada por el tester sobre una BD aislada sembrada por script; la BD real conservó su SHA-256. Diez comprobaciones en PASA: copia creada, `integrity_check = ok`, confirmación de sobrescritura (NO deja intacto por `LastWriteTime`, SÍ reescribe), rechazo de copiar sobre la base en uso y recuperación de una copia anterior, con desaparición de los datos posteriores y la aplicación funcionando. Notas: la copia es una foto, no una vista viva; al elegir como destino la propia base aparece primero la confirmación de sobrescritura y luego el aviso de base en uso (cosmético); el selector y la aplicación no añaden `.db` ni validan el nombre; la recuperación es manual y con la aplicación cerrada.
+
 ### Dependencias (versiones finales)
 
 - `org.xerial:sqlite-jdbc:3.49.1.0`
@@ -137,7 +149,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (132 pruebas actuales + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (139 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -160,7 +172,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1, 2, 2.5, 3, 4, 5, 6 y 7** | Terminadas. |
+| **Fases 1, 2, 2.5, 3, 4, 5, 6, 7 y 8** | Terminadas. |
 | **Triggers de SQLite (P1)** | **Cerrada.** Seis triggers idempotentes en `InicializadorBD`: no se permite borrar en `asociado`, `prestamo`, `cuota`, `pago` ni `usuario`, y no se puede actualizar una cuota que ya tenga pagos. Commits `9e67a53` y `5addd77`. |
 | **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
@@ -169,7 +181,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 | **Política de contraseña** | *Supuesto mínimo:* obligatoria, 6 caracteres o más, con confirmación al crear. Si el usuario define otra regla, prevalece la suya. |
 | **Sesión** | Sin "cerrar sesión", sin multiusuario ni permisos. Cambio de contraseña: opcional (ver sección 12). |
 | **Segundo administrador** | Imposible: lo impide el servicio y, además, `UNIQUE(nombre_usuario)` en SQLite. |
-| **Copia de seguridad** | Botón con `JFileChooser` + procedimiento de recuperación documentado. Fase posterior. |
+| **Copia de seguridad** | **Cerrada.** Botón en la barra superior, `VACUUM INTO`, confirmación de sobrescritura y procedimiento de recuperación manual documentado en el README. Commits `51c4d45`, `60389b0` y `f397f2a`. |
 | **Datos ficticios** | Script SQL en `demo/` ejecutado manualmente; **nunca** al arrancar. |
 | **Apariencia** | Look and feel del sistema. **No** FlatLaf. Paleta del documento aplicada a mano. |
 | **Git** | Commits pequeños en español. **No commitear sin que se pida.** |
@@ -227,7 +239,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: Copia de seguridad desde la interfaz (ver §12.8).
+Siguiente tarea: datos de demostración y documentación final (ver §12.9).
 
 ---
 
@@ -291,7 +303,7 @@ Siguiente tarea: Copia de seguridad desde la interfaz (ver §12.8).
 5. **Cuotas:** no se crea database/ErroresBD (un solo llamador no justifica la clase; además getErrorCode() devuelve 19 tanto para UNIQUE como para FK, así que el código no discrimina). La violación de unicidad se traduce en CuotaService con un método privado que use org.sqlite.SQLiteException.getResultCode() == SQLITE_CONSTRAINT_UNIQUE, nunca el texto del mensaje. Bloqueo de edición con pagos: comprobación en el servicio para el mensaje + UPDATE ... WHERE id = ? AND NOT EXISTS (SELECT 1 FROM pago WHERE cuota_id = ?) en el DAO para la atomicidad. AsociadoService.esDuplicadoDeDocumento no se toca en esta fase. Decisiones de Cuotas: numero_cuota >= 1 se valida solo en el servicio (el documento v3 no lo pide; no hay CHECK en el DDL porque la tabla ya existe); un préstamo Finalizado puede recibir cuotas (no hay regla documentada); P1 (triggers) quedó cerrada (ver §3); la edición de un pago exigirá transacción (v3 §5.7), con sobrecargas de DAO que reciban una Connection. **Fase 5: terminada.**
 6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones. **Fase 6: terminada.**
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos. **Fase 7: terminada.**
-8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD.
+8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD. **Fase 8: terminada.**
 9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones).
 
 Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con tarjetas de acceso, extras de búsqueda. Lo demás es indispensable por los criterios de aceptación del documento.
@@ -314,3 +326,4 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
 - El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).
 - En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.
+- Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.
