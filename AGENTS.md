@@ -19,7 +19,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7, 8 y 9 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI); Fase 9 `2e96695` (demo y cierre).
 
 ### Fase 1 — estructura, esquema y arranque
 
