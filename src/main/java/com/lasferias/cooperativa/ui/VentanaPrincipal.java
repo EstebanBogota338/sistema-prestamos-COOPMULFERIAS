@@ -1,6 +1,7 @@
 package com.lasferias.cooperativa.ui;
 
 import com.lasferias.cooperativa.service.AsociadoService;
+import com.lasferias.cooperativa.service.CopiaSeguridadService;
 import com.lasferias.cooperativa.service.CuotaService;
 import com.lasferias.cooperativa.service.HistorialService;
 import com.lasferias.cooperativa.service.PagoService;
@@ -11,15 +12,29 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.File;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class VentanaPrincipal extends JFrame {
 
+    private static final Logger LOGGER =
+        Logger.getLogger(VentanaPrincipal.class.getName());
+
+    private final CopiaSeguridadService copiaSeguridadService =
+        new CopiaSeguridadService();
     private final CardLayout tarjetas = new CardLayout();
     private final JPanel contenido = new JPanel(tarjetas);
     private final PanelAsociados panelAsociados;
@@ -120,6 +135,10 @@ public class VentanaPrincipal extends JFrame {
         avatar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         JPanel usuario = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         usuario.setOpaque(false);
+        JButton copia = new JButton("Copia de seguridad");
+        Estilo.botonSecundario(copia);
+        copia.addActionListener(e -> crearCopiaSeguridad(copia));
+        usuario.add(copia);
         usuario.add(avatar);
         usuario.add(administrador);
         barra.add(usuario, BorderLayout.EAST);
@@ -187,5 +206,62 @@ public class VentanaPrincipal extends JFrame {
         configurarPestana(pestanaPagos, false);
         configurarPestana(pestanaHistorial, true);
         panelHistorial.refrescar();
+    }
+
+    private void crearCopiaSeguridad(JButton boton) {
+        JFileChooser selector = new JFileChooser();
+        selector.setDialogTitle("Guardar copia de seguridad");
+        selector.setSelectedFile(new File(
+            "cooperativa-" + LocalDate.now() + ".db"));
+        selector.setFileFilter(new FileNameExtensionFilter(
+            "Bases de datos SQLite (*.db)", "db"));
+        File documentos = new File(
+            System.getProperty("user.home"), "Documents");
+        selector.setCurrentDirectory(documentos.isDirectory()
+            ? documentos : new File(System.getProperty("user.home")));
+
+        while (true) {
+            int opcion = selector.showSaveDialog(this);
+            if (opcion != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+            File archivo = selector.getSelectedFile();
+            if (archivo == null) {
+                return;
+            }
+
+            boolean sobrescribir = false;
+            if (archivo.exists()) {
+                int confirmacion = JOptionPane.showConfirmDialog(this,
+                    "El archivo ya existe. ¿Desea sobrescribirlo?",
+                    "Confirmar sobrescritura", JOptionPane.YES_NO_OPTION);
+                if (confirmacion != JOptionPane.YES_OPTION) {
+                    continue;
+                }
+                sobrescribir = true;
+            }
+
+            boton.setEnabled(false);
+            try {
+                Path ruta = copiaSeguridadService.crearCopia(
+                    archivo.toPath(), sobrescribir);
+                JOptionPane.showMessageDialog(this,
+                    "Copia de seguridad creada en:\n" + ruta,
+                    "Copia de seguridad", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(),
+                    "Copia de seguridad", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE,
+                    "No se pudo crear la copia de seguridad.", e);
+                JOptionPane.showMessageDialog(this,
+                    "No se pudo crear la copia de seguridad. "
+                        + "Intente nuevamente.",
+                    "Copia de seguridad", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                boton.setEnabled(true);
+            }
+            return;
+        }
     }
 }
