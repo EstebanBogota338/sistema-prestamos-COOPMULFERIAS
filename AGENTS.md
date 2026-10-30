@@ -19,7 +19,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7, 8 y 9 terminadas
 
-**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI); Fase 9 `2e96695` (demo y cierre); Cierre MVP (correcciones de la demo).
+**No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI); Fase 9 `2e96695` (demo y cierre); Cierre MVP (correcciones de la demo); Pulido de legibilidad (posterior al cierre): `e02599c`, `75f3213`, `e4c7a33`, `804f123`, `d38960f` y `8ad1fe8`.
 
 ### Fase 1 — estructura, esquema y arranque
 
@@ -41,7 +41,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 | [ui/Estilo.java](src/main/java/com/lasferias/cooperativa/ui/Estilo.java) | Paleta, fuente, botón primario/secundario y borde de campo compartidos (Fase 2.5) |
 | [App.java](src/main/java/com/lasferias/cooperativa/App.java) | Inicializa la BD, aplica el look and feel y abre `VentanaCreacionAdministrador` si `usuario` está vacía, o `VentanaLogin` si no; `System.exit(1)` si falla la BD |
 
-**Pruebas actuales: 139** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5, 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1), 5 de P1 (triggers, en `InicializadorBDTest`), 7 de la Fase 7 (`HistorialDAOTest` 4, `HistorialServiceTest` 2, `PanelHistorialTest` 1) y 7 de la Fase 8 (`CopiaSeguridadDAOTest` 2, `CopiaSeguridadServiceTest` 5). `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **139 pruebas y 0 fallos**.
+**Pruebas actuales: 140** (JUnit 5 + `@TempDir`) — 49 de las fases 1–3, 29 de la Fase 4, 21 de la Fase 5, 21 de la Fase 6 (`PagoDAOTest` 5, `PagoServiceTest` 10, `FormularioPagoTest` 5, `PanelPagosTest` 1), 5 de P1 (triggers, en `InicializadorBDTest`), 7 de la Fase 7 (`HistorialDAOTest` 4, `HistorialServiceTest` 2, `PanelHistorialTest` 1), 7 de la Fase 8 (`CopiaSeguridadDAOTest` 2, `CopiaSeguridadServiceTest` 5) y 1 de `EstiloTest`. `PanelAsociadosTest` es la prueba renombrada de Asociados. `mvn clean test` da **140 pruebas y 0 fallos**.
 
 **Decisiones de la ronda de calidad (no están en el documento; documéntalas, no las amplíes):** documento guardado en mayúsculas con unicidad insensible a mayúsculas en servicio y DAO (`COLLATE NOCASE`); búsqueda por documento, nombres y apellidos ignorando acentos y comodines (filtrado en Java); orden alfabético con `Collator` es-CO; diagnóstico con `java.util.logging`.
 
@@ -159,7 +159,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ```
 mvn clean compile   → BUILD SUCCESS
-mvn test            → Failures: 0, Errors: 0 (139 pruebas actuales + las que agregue cada fase)
+mvn test            → Failures: 0, Errors: 0 (140 pruebas actuales + las que agregue cada fase)
 mvn exec:java       → abre la aplicación sin excepciones
 ```
 
@@ -232,6 +232,8 @@ Cada módulo sigue: `model` (datos) → `dao` (JDBC con `Path` inyectable) → `
 | Verde principal / hover | `#2F8F57` / `#256F45` |
 | Barra superior | 52 px, blanca, borde inferior |
 | Botón primario | fondo `#2F8F57`, texto blanco |
+| Texto de ayuda (bajo los campos) | `#4B5563` — más oscuro que `#6B7280` para legibilidad a 12 px |
+| Aviso informativo (no error) | `#8A5A00` — ámbar; reserva `#B42318` para errores reales |
 
 No portar HTML, CSS, CDN ni iconos: la UI es Swing.
 
@@ -315,6 +317,7 @@ MVP terminado; queda la sustentación.
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos. **Fase 7: terminada.**
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD. **Fase 8: terminada.**
 9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones). **Fase 9: terminada.**
+10. **Pulido de legibilidad de la interfaz** — **terminado**: separador de miles en las cinco pantallas, textos de ayuda a 12 px con más contraste, color propio para los avisos informativos y ancho mínimo de ventana de 1000 px para que quepan las cinco pestañas.
 
 Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con tarjetas de acceso, extras de búsqueda. Lo demás es indispensable por los criterios de aceptación del documento.
 
@@ -339,3 +342,4 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - En la pestaña Historial, las tres tablas reparten la altura a partes iguales, así que con varios pagos hay que desplazarse para verlos todos. Cosmético.
 - Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.
 - No hay pantalla de inicio (Home) con tarjetas de acceso, como describe el documento en §7: la navegación se resuelve con la barra superior de pestañas y cubre los cinco módulos. Fue un recorte deliberado para priorizar el flujo funcional.
+- En la tabla de Préstamos, la columna «Asociado» puede mostrarse truncada con `…` si el nombre es largo; se ensancha arrastrando el borde de la columna.

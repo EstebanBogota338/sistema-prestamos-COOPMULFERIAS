@@ -22,7 +22,10 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 8 | Copia de seguridad desde la interfaz | Terminada |
 | 9 | Datos de demostración y documentación final | Terminada |
 
-**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; módulo de Pagos con navegación, registro, consulta y edición; historial por asociado con tres tablas encadenadas; y copia de seguridad desde la barra superior, sin cálculos financieros ni borrado. **139 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
+> Incluye un pulido de legibilidad posterior al cierre: montos con separador de miles (`1.500.000`),
+> textos de ayuda con más contraste y tamaño, y un ancho mínimo de ventana de 1000 px.
+
+**Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; módulo de Pagos con navegación, registro, consulta y edición; historial por asociado con tres tablas encadenadas; y copia de seguridad desde la barra superior, sin cálculos financieros ni borrado. **140 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
 **Todo lo previsto está implementado.** Las limitaciones asumidas se detallan más abajo. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md). Detalle de la Fase 7: [docs/fase-7-historial.md](docs/fase-7-historial.md). Detalle de la Fase 8: [docs/fase-8-copia.md](docs/fase-8-copia.md).
 
@@ -38,7 +41,7 @@ Desde la carpeta del proyecto, en la terminal de VS Code (PowerShell):
 
 ```
 mvn clean compile   # compila
-mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas, pagos, historial y copia: 139 en total)
+mvn test            # pruebas JUnit 5 (esquema, asociados, autenticación, préstamos, cuotas, pagos, historial y copia: 140 en total)
 mvn exec:java       # inicializa la base de datos y abre la aplicación
 ```
 
@@ -196,3 +199,4 @@ Las siguientes limitaciones están asumidas por diseño:
 - En la pestaña Historial, las tres tablas reparten la altura a partes iguales, así que con varios pagos hay que desplazarse para verlos todos. Cosmético.
 - Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.
 - No hay pantalla de inicio (Home) con tarjetas de acceso, como describe el documento en §7: la navegación se resuelve con la barra superior de pestañas y cubre los cinco módulos. Fue un recorte deliberado para priorizar el flujo funcional.
+- En la tabla de Préstamos, la columna «Asociado» puede mostrarse truncada con `…` si el nombre es largo; se ensancha arrastrando el borde de la columna.

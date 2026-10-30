@@ -37,3 +37,20 @@ La lista canónica es **«Limitaciones conocidas»** del README. No se repite aq
 - Pantalla Home con tarjetas (recorte deliberado).
 - P3 y P4 (decisiones de no imponer validaciones).
 - Mejoras de pulido ya anotadas: foco tras guardado fallido, combo de cuota truncado y altura del Historial.
+
+## Pulido de legibilidad posterior al cierre
+
+Seis commits posteriores al cierre del MVP:
+
+- `e02599c`: tono propio para los textos de ayuda de los formularios.
+- `75f3213`: color de aviso para el bloqueo de cuota.
+- `e4c7a33`: separador de miles en la presentación de montos y `EstiloTest`.
+- `804f123`: ancho mínimo de ventana de 1000 px para que quepan las cinco pestañas.
+- `d38960f`: textos de ayuda a 12 px y acortamiento del texto más largo.
+- `8ad1fe8`: formato de moneda en las etiquetas que concatenan el monto del préstamo.
+
+**Corrección de un dato:** el mínimo de la ventana ya no es 900×600 sino **1000×600**. La barra superior necesita unos 952 px desde que la Fase 8 le añadió el botón «Copia de seguridad»; a 900 la pestaña Historial se quedaba fuera. La comprobación de la Fase 7 («cinco pestañas en una línea a 900×600») quedó desmentida por este hallazgo.
+
+**El fallo que encontró el tester:** la columna «Préstamo» del Historial —y dos etiquetas más— seguía mostrando el monto crudo. Lo cazó mirando la pantalla, no la suite. Se arregló con `Estilo.formatearMoneda` en los tres sitios y con una aserción en `PanelHistorialTest` que ahora fija el formato.
+
+El pre-relleno de los formularios en edición usa el mismo formato y el valor **no cambia** al guardar sin tocar el campo, porque `parsearMonto` acepta los puntos y `FormularioPrestamoTest` ya cubría ese análisis.
