@@ -20,11 +20,11 @@ La aplicación **complementa** a Helisa; no lo reemplaza ni se integra con él, 
 | 6 | Pagos (modelo, DAO, servicio, pantalla y formulario) | Terminada |
 | 7 | Historial por asociado (consulta) | Terminada |
 | 8 | Copia de seguridad desde la interfaz | Terminada |
-| 9+ | Datos de demostración y documentación final | Pendiente |
+| 9 | Datos de demostración y documentación final | Terminada |
 
 **Implementado hoy:** alta, búsqueda, consulta y edición de asociados; inicio de sesión y creación del administrador inicial con hash BCrypt; módulo de Préstamos con navegación principal, registro, consulta y edición; módulo de Cuotas con navegación, registro, consulta y edición; módulo de Pagos con navegación, registro, consulta y edición; historial por asociado con tres tablas encadenadas; y copia de seguridad desde la barra superior, sin cálculos financieros ni borrado. **139 pruebas automatizadas.** El recorrido completo ya se validó manualmente por el tester sobre una base de datos temporal.
 
-**Aún no implementado** (no debe presentarse como operativo): datos de demostración y documentación final. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md). Detalle de la Fase 7: [docs/fase-7-historial.md](docs/fase-7-historial.md). Detalle de la Fase 8: [docs/fase-8-copia.md](docs/fase-8-copia.md).
+**Todo lo previsto está implementado.** Las limitaciones asumidas se detallan más abajo. Detalle de la Fase 4: [docs/fase-4-prestamos.md](docs/fase-4-prestamos.md). Detalle de la Fase 5: [docs/fase-5-cuotas.md](docs/fase-5-cuotas.md). Detalle de la Fase 6: [docs/fase-6-pagos.md](docs/fase-6-pagos.md). Detalle de la Fase 7: [docs/fase-7-historial.md](docs/fase-7-historial.md). Detalle de la Fase 8: [docs/fase-8-copia.md](docs/fase-8-copia.md).
 
 ## Requisitos
 
@@ -71,6 +71,24 @@ Fechas en texto ISO (`YYYY-MM-DD`); montos en pesos colombianos enteros (`INTEGE
 > una cuota que ya tiene pagos. Una base creada antes de esta versión los recibe en el siguiente
 > arranque, una sola vez: el archivo cambia en ese arranque y a partir de ahí queda estable.
 
+## Configuración del administrador
+
+En el primer arranque, si la tabla `usuario` está vacía, la aplicación pide **contraseña y confirmación**. El nombre de usuario no se pregunta: se guarda siempre como `admin`. La contraseña debe tener **6 caracteres o más** y se almacena con **BCrypt**; nunca en texto plano. Solo existe un administrador. **No hay cambio ni recuperación de contraseña**: si se olvida, hay que restaurar una copia de seguridad o recrear la base de datos.
+
+## Datos de demostración
+
+`demo/demo.sql` contiene datos **ficticios** para una demostración: 5 asociados, 6 préstamos (4 Vigentes y 2 Finalizados), 15 cuotas y 12 pagos, con un abono parcial y un recibo repetido en cuotas distintas. Se carga **a mano** y **nunca** al arrancar; no inserta el administrador.
+
+Con la aplicación cerrada, desde la carpeta del proyecto y sobre una base ya creada que no tenga los datos de la demo (el script no toca la tabla `usuario`):
+
+```
+sqlite3 "%USERPROFILE%\AppData\Roaming\CooperativaLasFerias\cooperativa.db" ".read demo/demo.sql"
+```
+
+En PowerShell, usa `$env:USERPROFILE` en lugar de `%USERPROFILE%`. También sirve cualquier cliente SQLite que ejecute el archivo. Si la base es nueva, ábrela una vez para crear el esquema y el administrador, ciérrala y luego carga la demo. El script debe ejecutarse una sola vez: los documentos son únicos y una segunda ejecución fallará.
+
+Para empezar de cero: cierra la aplicación, borra `cooperativa.db` y vuelve a abrirla; se recrea vacía y pide crear el administrador.
+
 ## Arquitectura
 
 Capas simples, sin frameworks: `ui` → `service` → `dao` → `database`, con `model` compartido. Cada operación de base de datos abre y cierra su propia conexión; no existe una conexión global.
@@ -88,6 +106,8 @@ docs/
 ├── fase-7-historial.md
 ├── fase-8-copia.md
 └── diseno/home-mockup.html
+demo/
+└── demo.sql
 src/main/java/com/lasferias/cooperativa/
 ├── App.java
 ├── database/  (ConexionBD, InicializadorBD)
@@ -123,7 +143,16 @@ src/test/java/com/lasferias/cooperativa/
 - Los pagos se corrigen editando el registro directamente, **sin historial de versiones ni auditoría**.
 - Se admiten abonos parciales; se rechazan pagos con valor nulo, cero o negativo.
 - Para pruebas y demostraciones se usan **solo datos ficticios**.
-- Ninguna funcionalidad pendiente debe darse por terminada.
+- Todo lo previsto está implementado; las limitaciones conocidas se detallan al final.
+
+## Guion de demostración
+
+1. **Login** y recorrido por **Asociados**.
+2. **Préstamos:** consulta y edición de un préstamo.
+3. **Cuotas:** editar una cuota sin pagos e intentar editar una con pagos para mostrar el bloqueo.
+4. **Pagos:** registrar un abono parcial y editar un pago.
+5. **Historial:** elegir un asociado y comprobar las tres tablas encadenadas.
+6. **Copia de seguridad:** crear una copia y mostrar el procedimiento de restauración.
 
 ## Copia de seguridad y recuperación
 
@@ -146,14 +175,17 @@ src/test/java/com/lasferias/cooperativa/
 
 ## Limitaciones conocidas
 
-Se completará al terminar el MVP. Ya están definidas por diseño:
+Las siguientes limitaciones están asumidas por diseño:
 
-- La edición de pagos **no conserva versiones anteriores** ni implementa auditoría avanzada.
-- El campo `plazo` es texto libre, sin unidad fija.
-- Los vínculos se fijan al crear (P2 a): un préstamo no puede cambiar de asociado al editarse; un vínculo mal puesto no se puede mover ni eliminar.
-- Hay un único administrador, sin permisos ni operación simultánea desde varios equipos.
+- La edición de pagos **no conserva versiones anteriores** ni implementa auditoría (decisión cerrada del documento).
+- Sin bloqueo por intentos fallidos.
+- jBCrypt 0.4 no tiene mantenimiento activo y solo considera los primeros 72 bytes de la contraseña; es adecuado para este alcance.
+- `plazo` es texto libre, sin unidad definida.
+- Los vínculos se fijan al crear (P2 a): un registro creado bajo un padre equivocado no puede moverse ni eliminarse.
+- La unicidad del documento en SQLite distingue mayúsculas; el servicio normaliza a mayúsculas antes de guardar.
+- La ruta de la BD se arma con `user.home\AppData\Roaming`, no con la variable `%APPDATA%`; pueden diferir si el perfil está redirigido.
 - No hay cambio ni recuperación de contraseña: si se olvida, solo se recupera restaurando una copia de seguridad anterior o recreando la base de datos.
-- Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando).
+- Los botones primarios usan `BasicButtonUI` para que el fondo verde se pinte de verdad; como efecto secundario pierden el resaltado de "botón por defecto" del L&F de Windows (Enter sigue funcionando). Es apariencia, no comportamiento.
 - Pendiente de pulir, sin bloquear: tras un guardado fallido el foco se queda en el último campo y no viaja al que tiene el error.
 - `parsearMonto` acepta ceros a la izquierda sin separadores (`"000800"` → 800) y rechaza `"0.800"` y `"0.001"`; `"0"` lo rechaza el servicio, no el parser. Cuotas usa la misma regla.
 - En botones primarios deshabilitados el fondo sigue verde y el texto queda casi ilegible; es cosmético y solo ocurre mientras se guarda.
@@ -163,3 +195,4 @@ Se completará al terminar el MVP. Ya están definidas por diseño:
 - En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.
 - En la pestaña Historial, las tres tablas reparten la altura a partes iguales, así que con varios pagos hay que desplazarse para verlos todos. Cosmético.
 - Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.
+- No hay pantalla de inicio (Home) con tarjetas de acceso, como describe el documento en §7: la navegación se resuelve con la barra superior de pestañas y cubre los cinco módulos. Fue un recorte deliberado para priorizar el flujo funcional.

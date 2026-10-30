@@ -17,7 +17,7 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 ---
 
-## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7 y 8 terminadas
+## 2. Estado actual: Fases 1, 2, 2.5, 3, 4, 5, 6, 7, 8 y 9 terminadas
 
 **No las rehagas.** Commits: Fase 1 `ade0cf2`; Fase 2 base `3e045fb`; ronda de calidad `7b45498`; Fase 2.5 `66c39f1` y `73d4100`; Fase 3 `2f5aca0`, `de1cce5` y `f35961f`; Fase 4 `d4dd14a` (backend), `277390e` (UI), `33b86ac` (correcciones tras la prueba manual) y `71788f9` (cierre de documentación); Fase 5 `7a845ce` (modelo y DAO), `ed77dfb` (servicio) y `89e634b` (UI); Fase 6 `a6dd9cc` (modelo y DAO), `55dcc8e` (servicio) y `8700305` (UI); Fase 7 `fc9199b` (DAO), `40e9dcc` (servicio) y `cdfd41f` (UI); Fase 8 `51c4d45` (DAO), `60389b0` (servicio) y `f397f2a` (UI).
 
@@ -131,6 +131,16 @@ Herramienta de escritorio **offline** para la cooperativa vinculada a la Plaza d
 
 **Prueba manual (Fase 8):** validada por el tester sobre una BD aislada sembrada por script; la BD real conservó su SHA-256. Diez comprobaciones en PASA: copia creada, `integrity_check = ok`, confirmación de sobrescritura (NO deja intacto por `LastWriteTime`, SÍ reescribe), rechazo de copiar sobre la base en uso y recuperación de una copia anterior, con desaparición de los datos posteriores y la aplicación funcionando. Notas: la copia es una foto, no una vista viva; al elegir como destino la propia base aparece primero la confirmación de sobrescritura y luego el aviso de base en uso (cosmético); el selector y la aplicación no añaden `.db` ni validan el nombre; la recuperación es manual y con la aplicación cerrada.
 
+### Fase 9 — datos de demostración y cierre (terminada)
+
+| Archivo | Acción |
+| --- | --- |
+| [demo/demo.sql](demo/demo.sql) | Crear: datos ficticios cargados a mano |
+| [README.md](README.md) | Modificar: configuración inicial, demo, guion y limitaciones |
+| [AGENTS.md](AGENTS.md) | Modificar: cierre y limitaciones |
+
+**Prueba manual final:** pendiente de la validación del tester en el recorrido completo y de la carga de `demo/demo.sql` sobre una base aislada. El script se verificó en una base temporal con 5 asociados, 6 préstamos, 15 cuotas y 12 pagos, `PRAGMA integrity_check = ok` y sin violaciones de FK.
+
 ### Dependencias (versiones finales)
 
 - `org.xerial:sqlite-jdbc:3.49.1.0`
@@ -172,7 +182,7 @@ Fechas `TEXT` ISO `YYYY-MM-DD`; montos `INTEGER` en pesos colombianos enteros (s
 
 | Tema | Decisión |
 | --- | --- |
-| **Fases 1, 2, 2.5, 3, 4, 5, 6, 7 y 8** | Terminadas. |
+| **Fases 1, 2, 2.5, 3, 4, 5, 6, 7, 8 y 9** | Terminadas. |
 | **Triggers de SQLite (P1)** | **Cerrada.** Seis triggers idempotentes en `InicializadorBD`: no se permite borrar en `asociado`, `prestamo`, `cuota`, `pago` ni `usuario`, y no se puede actualizar una cuota que ya tenga pagos. Commits `9e67a53` y `5addd77`. |
 | **Vínculos al editar (P2)** | Se fijan al crear y no se modifican; en edición se muestran como solo lectura. Aplica a `prestamo.asociado_id`, `cuota.prestamo_id` y `pago.cuota_id`. |
 | **Administrador inicial** | Si `usuario` está vacía, la app pide **contraseña y confirmación** para crearlo. El nombre de usuario **no se pide**: se guarda siempre como `admin` (constante). |
@@ -239,7 +249,7 @@ Los colores, `fuente()`, los botones primario y secundario y el borde de campo s
 - Usuario: siempre `admin` (constante del servicio).
 - Al crear el administrador se abre el login.
 
-Siguiente tarea: datos de demostración y documentación final (ver §12.9).
+MVP terminado; queda la sustentación.
 
 ---
 
@@ -304,7 +314,7 @@ Siguiente tarea: datos de demostración y documentación final (ver §12.9).
 6. **Pagos:** P2 cerrada (a); edición directa en transacción, abonos parciales, sin historial de versiones. **Fase 6: terminada.**
 7. **Historial por asociado:** consultas con `JOIN`, sin duplicar registros, estado actual de cada pago, sin totales ni saldos. **Fase 7: terminada.**
 8. **Copia de seguridad desde la UI:** `JFileChooser` + `VACUUM INTO` (copia consistente; **falla si el archivo destino ya existe**, así que hay que confirmar la sobrescritura o usar un nombre nuevo). Procedimiento de recuperación documentado: con la aplicación cerrada, reemplazar el archivo de la BD. **Fase 8: terminada.**
-9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones).
+9. **Datos de demostración** (`demo/`, script SQL manual) y **documentación final** (README, procedimiento de respaldo, limitaciones). **Fase 9: terminada.**
 
 Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con tarjetas de acceso, extras de búsqueda. Lo demás es indispensable por los criterios de aceptación del documento.
 
@@ -326,4 +336,6 @@ Recortes si el tiempo aprieta (en este orden): cambio de contraseña, Home con t
 - El sistema no restringe el registro de cuotas según el estado del préstamo; el estado es un dato manual.
 - El sistema no verifica que la cantidad de cuotas registradas coincida con `prestamo.numero_cuotas` (decisión P3).
 - En el formulario de Pagos, el combo de cuota trunca la etiqueta cuando está cerrado (se lee completa en la lista desplegada y en la tabla). Cosmético.
+- En la pestaña Historial, las tres tablas reparten la altura a partes iguales, así que con varios pagos hay que desplazarse para verlos todos. Cosmético.
 - Al sobrescribir una copia de seguridad, el archivo anterior se borra antes de generar el nuevo; si la generación fallara, hay que repetirla. La base en uso no se ve afectada.
+- No hay pantalla de inicio (Home) con tarjetas de acceso, como describe el documento en §7: la navegación se resuelve con la barra superior de pestañas y cubre los cinco módulos. Fue un recorte deliberado para priorizar el flujo funcional.
