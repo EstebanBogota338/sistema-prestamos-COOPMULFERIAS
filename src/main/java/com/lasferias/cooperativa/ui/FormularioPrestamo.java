@@ -125,7 +125,7 @@ public class FormularioPrestamo extends JDialog {
 
         Estilo.campo(monto);
         agregarCampo(campos, restricciones, "Monto *", monto,
-            "Solo números; puede usar puntos como separador de miles.");
+            "Acepta puntos como separador de miles.");
 
         Estilo.campo(fecha);
         agregarCampo(campos, restricciones, "Fecha *", fecha,
@@ -200,7 +200,7 @@ public class FormularioPrestamo extends JDialog {
         contenedor.add(campo, BorderLayout.CENTER);
         if (ayuda != null) {
             JLabel ayudaLabel = new JLabel(ayuda);
-            ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 11));
+            ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 12));
             ayudaLabel.setForeground(Estilo.TEXTO_AYUDA);
             contenedor.add(ayudaLabel, BorderLayout.SOUTH);
         }

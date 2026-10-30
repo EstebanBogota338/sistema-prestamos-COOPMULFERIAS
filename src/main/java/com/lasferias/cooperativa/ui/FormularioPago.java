@@ -134,7 +134,7 @@ public class FormularioPago extends JDialog {
 
         Estilo.campo(valor);
         agregarCampo(campos, restricciones, "Valor *", valor,
-            "Solo números; puede usar puntos como separador de miles.");
+            "Acepta puntos como separador de miles.");
 
         Estilo.campo(numeroRecibo);
         agregarCampo(campos, restricciones, "N.º de recibo *", numeroRecibo, null);
@@ -192,7 +192,7 @@ public class FormularioPago extends JDialog {
         contenedor.add(campo, BorderLayout.CENTER);
         if (ayuda != null) {
             JLabel ayudaLabel = new JLabel(ayuda);
-            ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 11));
+            ayudaLabel.setFont(Estilo.fuente(Font.PLAIN, 12));
             ayudaLabel.setForeground(Estilo.TEXTO_AYUDA);
             contenedor.add(ayudaLabel, BorderLayout.SOUTH);
         }
