@@ -238,7 +238,7 @@ public class FormularioPago extends JDialog {
 
         cuotaFija.setText(formatearCuota(buscarCuota(existente.getCuotaId())));
         fechaPago.setText(existente.getFechaPago().toString());
-        valor.setText(String.valueOf(existente.getValor()));
+        valor.setText(Estilo.formatearMoneda(existente.getValor()));
         numeroRecibo.setText(existente.getNumeroRecibo());
         habilitarAcciones(true);
     }

@@ -67,10 +67,10 @@ class PanelPagosTest {
         assertEquals(1, tabla.getRowCount());
         assertEquals(4, tabla.getColumnCount());
         assertEquals(
-            "11111111 - Ana Pérez - 2026-10-29 - 1000000 - Cuota 1",
+            "11111111 - Ana Pérez - 2026-10-29 - 1.000.000 - Cuota 1",
             tabla.getValueAt(0, 0));
         assertEquals("2026-12-01", tabla.getValueAt(0, 1));
-        assertEquals("40000", tabla.getValueAt(0, 2));
+        assertEquals("40.000", tabla.getValueAt(0, 2));
         assertEquals("REC-001", tabla.getValueAt(0, 3));
 
         JLabel estado = componentes(panel, JLabel.class).stream()

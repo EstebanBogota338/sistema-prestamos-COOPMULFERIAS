@@ -52,11 +52,11 @@ class PanelPrestamosTest {
         assertEquals(1, tabla.getRowCount());
         assertEquals(7, tabla.getColumnCount());
         assertEquals("11111111 - Ana Pérez", tabla.getValueAt(0, 0));
-        assertEquals("1000000", tabla.getValueAt(0, 1));
+        assertEquals("1.000.000", tabla.getValueAt(0, 1));
         assertEquals("2026-10-29", tabla.getValueAt(0, 2));
         assertEquals("12 meses", tabla.getValueAt(0, 3));
         assertEquals("12", tabla.getValueAt(0, 4));
-        assertEquals("90000", tabla.getValueAt(0, 5));
+        assertEquals("90.000", tabla.getValueAt(0, 5));
         assertEquals("Vigente", tabla.getValueAt(0, 6));
 
         JLabel titulo = componentes(panel, JLabel.class).stream()

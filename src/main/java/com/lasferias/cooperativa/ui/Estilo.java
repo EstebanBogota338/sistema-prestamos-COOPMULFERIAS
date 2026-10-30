@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
@@ -35,12 +38,19 @@ public final class Estilo {
 
     private static final int MARGEN_VERTICAL_BOTON = 8;
     private static final int MARGEN_HORIZONTAL_BOTON = 15;
+    private static final DecimalFormat MONEDA = new DecimalFormat("#,##0",
+        DecimalFormatSymbols.getInstance(Locale.forLanguageTag("es-CO")));
 
     private Estilo() {
     }
 
     public static Font fuente(int estilo, int tamano) {
         return new Font("Segoe UI", estilo, tamano);
+    }
+
+    /** Presentación de montos: 1500000 → "1.500.000". No altera el valor almacenado. */
+    public static String formatearMoneda(long valor) {
+        return MONEDA.format(valor);
     }
 
     public static void botonPrimario(JButton boton) {

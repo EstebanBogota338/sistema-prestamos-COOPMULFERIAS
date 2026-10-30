@@ -320,7 +320,7 @@ public class PanelPagos extends JPanel {
             return switch (columna) {
                 case 0 -> textoCuota(pago.getCuotaId());
                 case 1 -> pago.getFechaPago().toString();
-                case 2 -> String.valueOf(pago.getValor());
+                case 2 -> Estilo.formatearMoneda(pago.getValor());
                 case 3 -> pago.getNumeroRecibo();
                 default -> "";
             };
@@ -341,7 +341,8 @@ public class PanelPagos extends JPanel {
             }
             return asociado.getDocumento() + " - "
                 + asociado.getNombres() + " " + asociado.getApellidos()
-                + " - " + prestamo.getFecha() + " - " + prestamo.getMonto()
+                + " - " + prestamo.getFecha() + " - "
+                + Estilo.formatearMoneda(prestamo.getMonto())
                 + " - Cuota " + cuota.getNumeroCuota();
         }
     }

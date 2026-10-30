@@ -318,7 +318,7 @@ public class PanelCuotas extends JPanel {
             return switch (columna) {
                 case 0 -> textoPrestamo(cuota.getPrestamoId());
                 case 1 -> String.valueOf(cuota.getNumeroCuota());
-                case 2 -> String.valueOf(cuota.getValor());
+                case 2 -> Estilo.formatearMoneda(cuota.getValor());
                 case 3 -> cuota.getFechaVencimiento().toString();
                 default -> "";
             };
@@ -335,7 +335,8 @@ public class PanelCuotas extends JPanel {
             }
             return asociado.getDocumento() + " - "
                 + asociado.getNombres() + " " + asociado.getApellidos()
-                + " - " + prestamo.getFecha() + " - " + prestamo.getMonto();
+                + " - " + prestamo.getFecha() + " - "
+                + Estilo.formatearMoneda(prestamo.getMonto());
         }
     }
 }

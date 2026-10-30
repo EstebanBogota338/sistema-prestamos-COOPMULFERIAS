@@ -254,7 +254,7 @@ public class FormularioCuota extends JDialog {
         Prestamo prestamo = buscarPrestamo(existente.getPrestamoId());
         prestamoFijo.setText(formatearPrestamo(prestamo));
         numeroCuota.setText(String.valueOf(existente.getNumeroCuota()));
-        valor.setText(String.valueOf(existente.getValor()));
+        valor.setText(Estilo.formatearMoneda(existente.getValor()));
         fechaVencimiento.setText(existente.getFechaVencimiento().toString());
 
         if (conPagos) {

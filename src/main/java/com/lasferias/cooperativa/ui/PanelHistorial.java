@@ -339,10 +339,10 @@ public class PanelHistorial extends JPanel {
             Prestamo prestamo = prestamos.get(fila);
             return switch (columna) {
                 case 0 -> prestamo.getFecha().toString();
-                case 1 -> String.valueOf(prestamo.getMonto());
+                case 1 -> Estilo.formatearMoneda(prestamo.getMonto());
                 case 2 -> prestamo.getPlazo();
                 case 3 -> String.valueOf(prestamo.getNumeroCuotas());
-                case 4 -> String.valueOf(prestamo.getValorCuota());
+                case 4 -> Estilo.formatearMoneda(prestamo.getValorCuota());
                 case 5 -> prestamo.getEstado();
                 default -> "";
             };
@@ -395,7 +395,7 @@ public class PanelHistorial extends JPanel {
             return switch (columna) {
                 case 0 -> textoPrestamo(cuota.getPrestamoId());
                 case 1 -> String.valueOf(cuota.getNumeroCuota());
-                case 2 -> String.valueOf(cuota.getValor());
+                case 2 -> Estilo.formatearMoneda(cuota.getValor());
                 case 3 -> cuota.getFechaVencimiento().toString();
                 default -> "";
             };
@@ -459,7 +459,7 @@ public class PanelHistorial extends JPanel {
             return switch (columna) {
                 case 0 -> textoCuota(pago.getCuotaId());
                 case 1 -> pago.getFechaPago().toString();
-                case 2 -> String.valueOf(pago.getValor());
+                case 2 -> Estilo.formatearMoneda(pago.getValor());
                 case 3 -> pago.getNumeroRecibo();
                 default -> "";
             };

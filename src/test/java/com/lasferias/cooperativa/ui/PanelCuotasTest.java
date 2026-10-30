@@ -59,10 +59,10 @@ class PanelCuotasTest {
         JTable tabla = componente(panel, JTable.class);
         assertEquals(1, tabla.getRowCount());
         assertEquals(4, tabla.getColumnCount());
-        assertEquals("11111111 - Ana Pérez - 2026-10-29 - 1000000",
+        assertEquals("11111111 - Ana Pérez - 2026-10-29 - 1.000.000",
             tabla.getValueAt(0, 0));
         assertEquals("1", tabla.getValueAt(0, 1));
-        assertEquals("90000", tabla.getValueAt(0, 2));
+        assertEquals("90.000", tabla.getValueAt(0, 2));
         assertEquals("2026-11-30", tabla.getValueAt(0, 3));
 
         JLabel estado = componentes(panel, JLabel.class).stream()

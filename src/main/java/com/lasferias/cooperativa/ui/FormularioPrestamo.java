@@ -246,11 +246,11 @@ public class FormularioPrestamo extends JDialog {
 
         Asociado asociado = buscarAsociado(existente.getAsociadoId());
         asociadoFijo.setText(formatearAsociado(asociado));
-        monto.setText(String.valueOf(existente.getMonto()));
+        monto.setText(Estilo.formatearMoneda(existente.getMonto()));
         fecha.setText(existente.getFecha().toString());
         plazo.setText(existente.getPlazo());
         numeroCuotas.setText(String.valueOf(existente.getNumeroCuotas()));
-        valorCuota.setText(String.valueOf(existente.getValorCuota()));
+        valorCuota.setText(Estilo.formatearMoneda(existente.getValorCuota()));
         estado.setSelectedItem(existente.getEstado());
     }
 

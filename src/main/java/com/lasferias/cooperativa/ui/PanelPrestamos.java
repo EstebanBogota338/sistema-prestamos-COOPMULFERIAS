@@ -286,11 +286,11 @@ public class PanelPrestamos extends JPanel {
             Prestamo prestamo = prestamos.get(fila);
             return switch (columna) {
                 case 0 -> textoAsociado(prestamo.getAsociadoId());
-                case 1 -> String.valueOf(prestamo.getMonto());
+                case 1 -> Estilo.formatearMoneda(prestamo.getMonto());
                 case 2 -> prestamo.getFecha().toString();
                 case 3 -> prestamo.getPlazo();
                 case 4 -> String.valueOf(prestamo.getNumeroCuotas());
-                case 5 -> String.valueOf(prestamo.getValorCuota());
+                case 5 -> Estilo.formatearMoneda(prestamo.getValorCuota());
                 case 6 -> prestamo.getEstado();
                 default -> "";
             };
